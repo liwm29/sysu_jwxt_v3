@@ -1,4 +1,4 @@
-package jwxt
+package proxyServer
 
 import "github.com/gin-gonic/gin"
 
