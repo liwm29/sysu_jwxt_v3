@@ -51,13 +51,15 @@ func (c *jwxtClient) CasFirstGet(captchaSavePath string, loginForm *loginForm) {
 }
 
 func (c *jwxtClient) Login(loginForm *url.Values) {
+	log.Info("登陆表单:", loginForm.Encode())
 	url := "https://cas.sysu.edu.cn/cas/login?service=https://jwxt.sysu.edu.cn/jwxt/api/sso/cas/login?pattern=student-login"
-	c.PostForm(url, loginForm.Encode())
+	html := c.PostForm(url, loginForm.Encode())
 	// 检查是否登陆成功
 	if c.CheckLogin() {
 		log.WithField("user", c.username).Info("登陆成功")
 	} else {
 		log.WithField("user", c.username).Info("登陆失败")
+		ioutil.WriteFile("./loginResp.html", html, 0666)
 	}
 }
 
@@ -65,7 +67,7 @@ func (c *jwxtClient) CheckLogin() bool {
 	url := "https://jwxt.sysu.edu.cn/jwxt/api/login/status"
 	respJson := c.Get(url)
 	log.WithField("respJson", string(respJson)).Info("checkLoginStatus")
-	if request.JsonToMap(respJson)["code"].(float64) == 200 {
+	if request.JsonToMap(respJson)["data"].(float64) == 1 {
 		c.isLogin = true // 也许不需要这个字段,考虑是否弃用
 		return true
 	} else {

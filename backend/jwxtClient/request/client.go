@@ -15,12 +15,14 @@ type HttpClient struct {
 func NewClient() *HttpClient {
 	// jar, _ := cookiejar.New(nil)
 	jar := NewSimpleJar()
-	return &HttpClient{
+	c := &HttpClient{
 		Cl: &http.Client{
 			Jar: jar,
 		},
 		CookieJar: jar,
 	}
+	c.SetRedirectCallback(nil)
+	return c
 }
 
 func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.Request) error) {

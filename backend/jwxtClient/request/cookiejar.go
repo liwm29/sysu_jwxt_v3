@@ -26,7 +26,7 @@ func (j *CookieJar) SetCookies(url *url.URL, cookies []*http.Cookie) {
 }
 
 func (j *CookieJar) Cookies(url *url.URL) []*http.Cookie {
-	return j.DB[url.Path]
+	return j.DB[url.Host]
 }
 
 func (j *CookieJar) StoreCookies(filepath string) {
