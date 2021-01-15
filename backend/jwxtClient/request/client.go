@@ -4,20 +4,22 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/cookiejar"
+	// "net/http/cookiejar"
 )
 
 type HttpClient struct {
-	Cl *http.Client
+	Cl        *http.Client
+	CookieJar *CookieJar
 }
 
 func NewClient() *HttpClient {
-	jar, _ := cookiejar.New(nil)
-
+	// jar, _ := cookiejar.New(nil)
+	jar := NewSimpleJar()
 	return &HttpClient{
 		Cl: &http.Client{
 			Jar: jar,
 		},
+		CookieJar: jar,
 	}
 }
 
@@ -43,9 +45,24 @@ func (c *HttpClient) Do(req *HttpReq) []byte {
 }
 
 func (c *HttpClient) Get(url string) []byte {
-	return c.Do(NewRequest("GET", url, nil))
+	return Get(url).Do(c)
 }
 
 func (c *HttpClient) Post(url string, body io.Reader) []byte {
-	return c.Do(NewRequest("POST", url, body))
+	return Post(url, body).Do(c)
+}
+
+func (c *HttpClient) PostJson(url, body string) []byte {
+	return PostJson(url, body).Do(c)
+}
+
+func (c *HttpClient) PostForm(url, body string) []byte {
+	return PostForm(url, body).Do(c)
+}
+
+func (c *HttpClient) StoreCookies(filepath string) {
+	c.CookieJar.StoreCookies(filepath)
+}
+func (c *HttpClient) LoadCookies(filepath string) {
+	c.CookieJar.LoadCookies(filepath)
 }

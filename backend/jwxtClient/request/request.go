@@ -32,6 +32,10 @@ func PostJson(url string, body string) *HttpReq {
 	return NewRequest("POST", url, strings.NewReader(body)).Json()
 }
 
+func PostForm(url string, body string) *HttpReq {
+	return NewRequest("POST", url, strings.NewReader(body)).Form()
+}
+
 func (r *HttpReq) Referer(referer string) *HttpReq {
 	r.Header.Set("Referer", referer)
 	return r
@@ -47,6 +51,10 @@ func (r *HttpReq) Form() *HttpReq {
 	return r
 }
 
-func (r *HttpReq) Do(c *HttpClient) []byte {
+type clienter interface {
+	Do(req *HttpReq) []byte
+}
+
+func (r *HttpReq) Do(c clienter) []byte {
 	return c.Do(r)
 }

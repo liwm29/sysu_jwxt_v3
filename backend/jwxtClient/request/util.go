@@ -2,7 +2,6 @@ package request
 
 import (
 	"encoding/json"
-	"reflect"
 )
 
 func PanicIf(err error) {

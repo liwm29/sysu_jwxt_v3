@@ -1,3 +1,5 @@
 .vscode
 vue-el-admin/
 sysu_jwxt_v2/
+backend/jwxtClient/test/cookie
+backend/jwxtClient/test/captcha.jpg
