@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	// "net/http/cookiejar"
 )
 
 type HttpClient struct {
@@ -13,7 +12,6 @@ type HttpClient struct {
 }
 
 func NewClient() *HttpClient {
-	// jar, _ := cookiejar.New(nil)
 	jar := NewSimpleJar()
 	c := &HttpClient{
 		Cl: &http.Client{
@@ -40,25 +38,25 @@ func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.R
 	c.Cl.CheckRedirect = f
 }
 
-func (c *HttpClient) Do(req *HttpReq) []byte {
+func (c *HttpClient) Do(req *HttpReq) *HttpResp {
 	resp, err := c.Cl.Do(req.Request)
 	PanicIf(err)
-	return NewResponse(resp).ReadAll()
+	return NewResponse(resp)
 }
 
-func (c *HttpClient) Get(url string) []byte {
+func (c *HttpClient) Get(url string) *HttpResp {
 	return Get(url).Do(c)
 }
 
-func (c *HttpClient) Post(url string, body io.Reader) []byte {
+func (c *HttpClient) Post(url string, body io.Reader) *HttpResp {
 	return Post(url, body).Do(c)
 }
 
-func (c *HttpClient) PostJson(url, body string) []byte {
+func (c *HttpClient) PostJson(url, body string) *HttpResp {
 	return PostJson(url, body).Do(c)
 }
 
-func (c *HttpClient) PostForm(url, body string) []byte {
+func (c *HttpClient) PostForm(url, body string) *HttpResp {
 	return PostForm(url, body).Do(c)
 }
 

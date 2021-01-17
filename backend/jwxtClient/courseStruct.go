@@ -2,7 +2,7 @@ package jwxtClient
 
 import "fmt"
 
-type courseListReq struct {
+type CourseListReq struct {
 	pageNo           int
 	pageSize         int
 	yearTerm         string
@@ -10,30 +10,73 @@ type courseListReq struct {
 	selectedCate     string
 	campusId         string
 	collectionStatus string
+	courseName       string
 }
 
-func (r *courseListReq) setNextPage() *courseListReq {
+func NewCourseListReq(yearTerm, courseType string) *CourseListReq {
+	selectedType, selectedCate := getCourseType(courseType)
+
+	return &CourseListReq{
+		pageNo:           1,
+		pageSize:         10,
+		yearTerm:         yearTerm,
+		selectedType:     selectedType,
+		selectedCate:     selectedCate,
+		campusId:         "",
+		collectionStatus: "0",
+		courseName:       "",
+	}
+}
+
+func getCourseType(courseType string) (selectedType, selectedCate string) {
+	switch courseType {
+	case "公选":
+		selectedType = _selectedType["校级公选"]
+		selectedCate = ""
+	case "专选":
+		selectedType = _selectedType["本专业"]
+		selectedCate = _selectedCate["专选"]
+	}
+	return
+}
+
+func (r *CourseListReq) SetCampusId(campus string) *CourseListReq {
+	r.campusId = campus
+	return r
+}
+
+func (r *CourseListReq) SetCourseName(courseName string) *CourseListReq {
+	r.courseName = courseName
+	return r
+}
+
+func (r *CourseListReq) SetCollection(isJustShowCollected string) *CourseListReq {
+	r.collectionStatus = isJustShowCollected
+	return r
+}
+
+func (r *CourseListReq) setNextPage() *CourseListReq {
 	r.pageNo += 1
 	return r
 }
 
-func (r *courseListReq) marshall() string {
-	tpl := `{"pageNo":%d,"pageSize":%d,"param":{"semesterYear":"%s","selectedType":"%s","selectedCate":"%s","hiddenConflictStatus":"0","hiddenSelectedStatus":"0","hiddenEmptyStatus":"0","vacancySortStatus":"0","collectionStatus":"%s","campusId":"%s"}}`
-	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, r.yearTerm, r.selectedType, r.selectedCate, r.collectionStatus, r.campusId)
+func (r *CourseListReq) marshall() string {
+	tpl := `{"pageNo":%d,"pageSize":%d,"param":{"semesterYear":"%s","selectedType":"%s","selectedCate":"%s","hiddenConflictStatus":"0","hiddenSelectedStatus":"0","hiddenEmptyStatus":"0","vacancySortStatus":"0","collectionStatus":"%s","campusId":"%s","courseName":"%s"}}`
+	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, r.yearTerm, r.selectedType, r.selectedCate, r.collectionStatus, r.campusId, r.courseName)
 }
 
 type courseListResp struct {
 	Code    int         `json:"code"`
 	Message interface{} `json:"message"`
 	Data    struct {
-		Total int   `json:"total"`
-		Rows  []Row `json:"rows"`
+		Total int          `json:"total"`
+		Rows  []courseInfo `json:"rows"`
 	} `json:"data"`
 }
 
-type Row struct {
+type courseInfo struct {
 	MainClassesID        string      `json:"mainClassesID"`
-	TeachingClassID      string      `json:"teachingClassId"`
+	TeachingClassID      string      `json:"teachingClassId"` // note this is clazzId
 	TeachingClassNum     string      `json:"teachingClassNum"`
 	TeachingClassName    interface{} `json:"teachingClassName"`
 	CourseNum            string      `json:"courseNum"`
@@ -66,7 +109,7 @@ type Row struct {
 	ScheduleExamTime     interface{} `json:"scheduleExamTime"`
 }
 
-type courseInfo struct {
+type courseTeacher struct {
 	Code int `json:"code"`
 	Data struct {
 		OutlineInfo struct {

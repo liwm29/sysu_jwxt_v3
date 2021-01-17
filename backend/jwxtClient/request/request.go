@@ -52,9 +52,9 @@ func (r *HttpReq) Form() *HttpReq {
 }
 
 type clienter interface {
-	Do(req *HttpReq) []byte
+	Do(req *HttpReq) *HttpResp
 }
 
-func (r *HttpReq) Do(c clienter) []byte {
+func (r *HttpReq) Do(c clienter) *HttpResp {
 	return c.Do(r)
 }
