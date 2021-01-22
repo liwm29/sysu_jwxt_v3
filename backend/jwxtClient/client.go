@@ -2,13 +2,14 @@ package jwxtClient
 
 import (
 	// "net/http"
+	"server/backend/jwxtClient/course"
 	"server/backend/jwxtClient/request"
+	"server/backend/jwxtClient/util"
 )
 
 type JwxtClient struct {
 	*request.HttpClient
 	username string
-	isLogin  bool
 	yearTerm string
 }
 
@@ -16,7 +17,6 @@ func NewClient(username string) *JwxtClient {
 	c := &JwxtClient{
 		HttpClient: request.NewClient(),
 		username:   username,
-		isLogin:    false,
 		yearTerm:   "2020-2",
 	}
 	return c
@@ -25,7 +25,7 @@ func NewClient(username string) *JwxtClient {
 func (c *JwxtClient) GetYearTerm() string {
 	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/stuCollectedCourse/getYearTerm"
 	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
-	var resp normalResp
+	var resp util.NormalResp
 	request.JsonToStruct(request.Get(url).Referer(ref).Do(c).Bytes(), &resp)
 	if resp.Code != 200 {
 		log.WithField("url", url).Error("can't get year term")
@@ -37,79 +37,51 @@ func (c *JwxtClient) GetYearTerm() string {
 	return ""
 }
 
-func (c *JwxtClient) ListCourseWithReq(reqJson *CourseListReq) []courseInfo {
-	log.WithField("reqJson", reqJson.marshall()).Debug("ListCourseWithReq")
-
-	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list"
-	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
-	respJson := request.PostJson(url, reqJson.marshall()).Referer(ref).Do(c).Bytes()
-
-	log.WithField("respJson", string(respJson)).Debug("ListCourseWithReq")
-
-	var resp courseListResp
-	request.JsonToStruct(respJson, &resp)
-	if resp.Code != 200 {
-		log.WithField("msg", resp.Message).Warn("get list error")
-	}
-	if resp.Code == 52021136 {
-		log.Error("黑名单")
-	}
-	totalCourses := resp.Data.Rows
-
-	n_course := resp.Data.Total
-	var times = n_course / 10 // 10 is one page size
-	for i := 0; i < times; i++ {
-		respJson := request.PostJson(url, reqJson.setNextPage().marshall()).Referer(ref).Do(c).Bytes()
-		var resp courseListResp
-		request.JsonToStruct(respJson, &resp)
-		totalCourses = append(totalCourses, resp.Data.Rows...)
-	}
-	return totalCourses
+func (c *JwxtClient) ListCourse(courseName, campusId, courseType string) *course.CourseList {
+	option := course.NewReqOption(campusId, courseName, false)
+	req := course.NewCourseListReq(c.yearTerm, course.NewCourseType(courseType), option)
+	return req.Do(c)
 }
 
-func (c *JwxtClient) ListCourse(courseType, courseName, campusId string) []*Course {
-	req := NewCourseListReq(c.yearTerm, courseType)
-	req.SetCourseName(courseName)
-	req.SetCampusId(campusId)
-	courses := c.ListCourseWithReq(req)
-	return newCourses(courseType, c.yearTerm, courses)
+func (c *JwxtClient) ListCoursePageN(courseName, campusId, courseType string, n_pages int) *course.CourseList {
+	option := course.NewReqOption(campusId, courseName, false)
+	req := course.NewCourseListReq(c.yearTerm, course.NewCourseType(courseType), option)
+	return req.DoPageN(c, n_pages)
 }
 
-func (c *JwxtClient) ListPubOpCourse(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, "")
+// 公选
+func (c *JwxtClient) ListPubElecCourse(courseName, campusId string) *course.CourseList {
+	return c.ListCourse(courseName, campusId, course.TYPE_PUB_ELECTIVE)
 }
 
-func (c *JwxtClient) ListPubOpCourseEast(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, _campus_id["东校园"])
-}
-func (c *JwxtClient) ListPubOpCourseSZ(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, _campus_id["深圳校区"])
-}
-func (c *JwxtClient) ListPubOpCourseNorth(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, _campus_id["北校园"])
-}
-func (c *JwxtClient) ListPubOpCourseSouth(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, _campus_id["南校园"])
-}
-func (c *JwxtClient) ListPubOpCourseZH(courseName string) []*Course {
-	return c.ListCourse("公选", courseName, _campus_id["珠海校区"])
+// func (c *JwxtClient) ListPubOpCourseEast(courseName string) *course.CourseList {
+// 	return c.ListCourse(courseName, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
+// }
+// func (c *JwxtClient) ListPubOpCourseSZ(courseName string) *course.CourseList {
+// 	return c.ListCourse(courseName, course.CAMPUS_SZ, course.TYPE_PUB_ELECTIVE)
+// }
+// func (c *JwxtClient) ListPubOpCourseNorth(courseName string) *course.CourseList {
+// 	return c.ListCourse(courseName, course.CAMPUS_NORTH, course.TYPE_PUB_ELECTIVE)
+// }
+// func (c *JwxtClient) ListPubOpCourseSouth(courseName string) *course.CourseList {
+// 	return c.ListCourse(courseName, course.CAMPUS_SOUTH, course.TYPE_PUB_ELECTIVE)
+// }
+// func (c *JwxtClient) ListPubOpCourseZH(courseName string) *course.CourseList {
+// 	return c.ListCourse(courseName, course.CAMPUS_ZH, course.TYPE_PUB_ELECTIVE)
+// }
+
+// 专选
+func (c *JwxtClient) ListMajElecCourse(courseName, campusId string) *course.CourseList {
+	return c.ListCourse(courseName, campusId, course.TYPE_MAJ_ELECTIVE)
 }
 
-func (c *JwxtClient) ListMajOpCourse(courseName string) []*Course {
-	return c.ListCourse("专选", courseName, "")
+// 专必
+func (c *JwxtClient) ListMajCompCourse(courseName, campusId string) *course.CourseList {
+	return c.ListCourse(courseName, campusId, course.TYPE_MAJ_COMPULSORY)
 }
 
-func (c *JwxtClient) GetCoursePhase() coursePhase {
-	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo"
-	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
-	respJson := request.Get(url).Referer(ref).Do(c).Bytes()
-	var resp coursePhaseResp
-	request.JsonToStruct(respJson, &resp)
-	if resp.Code != 200 {
-		log.WithField("msg", resp.Message).Error("无法获取选课阶段")
-	}
-	return resp.Data
-	// {"code":200,"message":null,"data":{"electiveCourseStageName":"改补选","retreatCourseStatus":"1","code":200,"semesterYear":"2020-2","courseSelectType":"0","chooseCourseStatus":"1","electiveCourseStageCode":"3","startTime":"2021-01-08 13:00:00","endTime":"2021-03-04 23:00:00","crossMajor":"1"}}
+func (c *JwxtClient) GetCoursePhase() *course.CoursePhase {
+	return course.GetCoursePhase(c)
 }
 
 func (c *JwxtClient) GetFavicon() []byte {

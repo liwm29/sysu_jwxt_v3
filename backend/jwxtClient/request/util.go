@@ -3,63 +3,50 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"runtime"
+	"server/backend/jwxtClient/util"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
+	"github.com/rodaine/table"
 )
 
-func PanicIf(err error) {
-	if err != nil {
-		pc0, _, line0, _ := runtime.Caller(0)
-		pc1, _, line1, _ := runtime.Caller(1)
-		pc2, _, line2, _ := runtime.Caller(2)
-		pc3, _, line3, _ := runtime.Caller(3)
-		fmt.Printf("---------\nError happans:\n")
-		fmt.Printf("Error stack0: %s \t \t Line#%d\n", runtime.FuncForPC(pc0).Name(), line0)
-		fmt.Printf("Error stack1: %s \t \t Line#%d\n", runtime.FuncForPC(pc1).Name(), line1)
-		fmt.Printf("Error stack2: %s \t \t Line#%d\n", runtime.FuncForPC(pc2).Name(), line2)
-		fmt.Printf("Error stack3: %s \t \t Line#%d\n", runtime.FuncForPC(pc3).Name(), line3)
+var JsonParseErrFilePath = "jsonParseFailSrcData.log"
 
-		if err.Error() == "invalid character '<' looking for beginning of value" {
-			fmt.Println("猜测原因:响应返回了html,被当作了json进行解析")
-		}
-		panic(err)
+func JsonErr(err error, data []byte) {
+	if err != nil {
+		ioutil.WriteFile(JsonParseErrFilePath, data, 0666)
+		printParseErrDetailMsg(data)
+		util.PanicIf(err)
 	}
 }
 
-func ReactIf(err error, f func(), args ...interface{}) {
+func ReactIf(err error, f func()) {
 	if err != nil {
 		f()
-		checkParseData(args[0].([]byte))
-		PanicIf(err)
+		util.PanicIf(err)
 	}
 }
 
 func JsonToMap(data []byte) map[string]interface{} {
 	var d map[string]interface{}
-	ReactIf(json.Unmarshal(data, &d), func() {
-		ioutil.WriteFile("jsonParseFailSrcData", data, 0666)
-	}, data)
+	JsonErr(json.Unmarshal(data, &d), data)
 	return d
 }
 
 func JsonToStruct(data []byte, v interface{}) {
-	ReactIf(json.Unmarshal(data, v), func() {
-		ioutil.WriteFile("jsonParseFailSrcData", data, 0666)
-	}, data)
+	JsonErr(json.Unmarshal(data, v), data)
 }
 
 func JsonConvert(data []byte, v interface{}) {
-	ReactIf(json.Unmarshal(data, v), func() {
-		ioutil.WriteFile("jsonParseFailSrcData", data, 0666)
-	}, data)
+	JsonErr(json.Unmarshal(data, v), data)
 }
 
-func find403Forbidden(data []byte) bool {
+// 403
+func is403Forbidden(data []byte) bool {
 	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
-	PanicIf(err)
+	util.PanicIf(err)
 	text, err := dom.Find("head > title:nth-child(1)").Html()
 	if err != nil {
 		return false
@@ -70,10 +57,49 @@ func find403Forbidden(data []byte) bool {
 	return false
 }
 
-func checkParseData(data []byte) {
-	if find403Forbidden(data) {
-		fmt.Println("在待解析数据中发现了403 forbidden,检查请求的referer等头部")
-	} else {
-		fmt.Println("未在待解析数据中发现了403 forbidden")
+// 不对外网开放
+func isAccessForbidden(data []byte) bool {
+	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
+	util.PanicIf(err)
+	text, err := dom.Find("title").Html()
+	if err != nil {
+		return false
 	}
+	if text == "资源或业务被限制访问  Access Forbidden" {
+		return true
+	}
+	return false
+}
+
+func IsHtml(data []byte) bool {
+	return bytes.Contains(data, []byte("<!DOCTYPE html"))
+}
+
+func IsJson(data []byte) bool {
+	return data[0] == byte('{')
+}
+
+func printParseErrDetailMsg(data []byte) {
+	color.Red("Error detected: json parse")
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+	tab := table.New("Data type", "Error details", "Suggest").WithWidthFunc(runewidth.StringWidth)
+	tab.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	dataType := "unknown"
+	details := "null"
+	suggest := "检查" + JsonParseErrFilePath
+	if IsHtml(data) {
+		dataType = "html"
+		if is403Forbidden(data) {
+			details = "403 forbidden"
+			suggest = "检查请求的referer等头部"
+		} else if isAccessForbidden(data) {
+			details = "资源或业务被限制访问"
+			suggest = "检查是否处于校园网环境"
+		}
+	} else if IsJson(data) {
+		dataType = "json"
+	}
+	tab.AddRow(dataType, details, suggest)
+	tab.Print()
 }

@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"server/backend/jwxtClient/util"
 )
 
 // todo: 并发加锁
@@ -25,21 +26,31 @@ func NewSimpleJar() *CookieJar {
 }
 
 func (j *CookieJar) SetCookies(url *url.URL, cookies []*http.Cookie) {
-	j.DB[url.Host] = append(j.DB[url.Host], cookies...)
+	// attention: it is a stack
+	j.DB[url.Host] = append(cookies, j.DB[url.Host]...)
 }
 
 func (j *CookieJar) Cookies(url *url.URL) []*http.Cookie {
 	return j.DB[url.Host]
 }
 
-func (j *CookieJar) StoreCookies(filepath string) {
+func (j *CookieJar) StoreCookies(filepath string) error {
 	cookieJson, err := json.MarshalIndent(j.DB, "", "\t")
-	PanicIf(err)
-	ioutil.WriteFile(filepath, cookieJson, 0666)
+	util.PanicIf(err)
+	return ioutil.WriteFile(filepath, cookieJson, 0666)
 }
 
-func (j *CookieJar) LoadCookies(filepath string) {
+func (j *CookieJar) LoadCookies(filepath string) error {
 	cookieJson, err := ioutil.ReadFile(filepath)
-	PanicIf(err)
-	json.Unmarshal(cookieJson, &j.DB)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(cookieJson, &j.DB)
+}
+
+func (j *CookieJar) Clear() {
+	// j.DB = make(map[string][]*http.Cookie)
+	for k, _ := range j.DB {
+		delete(j.DB, k)
+	}
 }

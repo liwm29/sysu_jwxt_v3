@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"server/backend/jwxtClient/util"
 )
 
 type HttpResp struct {
@@ -22,7 +23,7 @@ func (resp *HttpResp) Bytes() []byte {
 	}
 
 	bytes, err := ioutil.ReadAll(resp.Body)
-	PanicIf(err)
+	util.PanicIf(err)
 	resp.Body.Close()
 	resp.copy = bytes
 	resp.isRead = true

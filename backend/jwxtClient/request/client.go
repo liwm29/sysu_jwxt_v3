@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"server/backend/jwxtClient/util"
 )
 
 type HttpClient struct {
@@ -26,10 +27,10 @@ func NewClient() *HttpClient {
 func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.Request) error) {
 	if f == nil {
 		f = func(req *http.Request, via []*http.Request) error {
-			if len(via) > 15 {
+			if len(via) > 20 {
 				return http.ErrUseLastResponse
 			} else {
-				fmt.Println("[Redirecting] via ", req.URL.Path, "Method: ", req.Method, "Cookie: ", req.Cookies())
+				fmt.Println("[Redirecting] via ", util.TruncateN(req.URL.Path, 40), "\t\t", "Method:", req.Method, "Cookie: ", req.Cookies())
 			}
 			return nil
 		}
@@ -40,7 +41,7 @@ func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.R
 
 func (c *HttpClient) Do(req *HttpReq) *HttpResp {
 	resp, err := c.Cl.Do(req.Request)
-	PanicIf(err)
+	util.PanicIf(err)
 	return NewResponse(resp)
 }
 
@@ -60,9 +61,9 @@ func (c *HttpClient) PostForm(url, body string) *HttpResp {
 	return PostForm(url, body).Do(c)
 }
 
-func (c *HttpClient) StoreCookies(filepath string) {
-	c.CookieJar.StoreCookies(filepath)
+func (c *HttpClient) StoreCookies(filepath string) error {
+	return c.CookieJar.StoreCookies(filepath)
 }
-func (c *HttpClient) LoadCookies(filepath string) {
-	c.CookieJar.LoadCookies(filepath)
+func (c *HttpClient) LoadCookies(filepath string) error {
+	return c.CookieJar.LoadCookies(filepath)
 }

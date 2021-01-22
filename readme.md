@@ -32,6 +32,8 @@
 - client.ListCourse
 - course.Choose
 - course.Cancel
+- student.GetImg
+- teacher.GetImg
 
 可以将/backend/jwxtClient作为一个库使用
 <!-- 
@@ -50,9 +52,12 @@
 - 2020/01/15 增加并测试了cookie管理,迁移了登陆,选课,退课实现
 - 2020/01/17 增加并测试了查询课程列表和单一课程功能
 
-<!-- ## DevLog
+## DevLog
 1. 前后端分离,肯定要分离开发,至于是否分离部署,看个人需要
    1. 如果分离部署,这是在说前端代码`npm run build`后,将`/dist`目录直接扔进nginx或tomcat,后端作为api服务器单独运行在另一个端口
       1. 由于端口不同,涉及CORS跨域资源共享问题,对xhr请求的发出没影响,主要是响应必须带有`Access-Control-Allow-Origin`,否则被浏览器拦截;dom的请求似乎直接禁止了,防止冒牌网站直接套壳iframe;具体如何,没试过
    2. 如果一起部署,也就是虽然后端服务器是作为api服务器,但是当请求`'/'`时,便返回`html`,其余的路由都是api
-      1. 这在go中很容易实现,但其实不算太优雅,毕竟api服务器多了几条ServeFile代码,动态路由的html(指访问`/`而不是`/index.html`)和其他静态文件都由api服务器响应 -->
+      1. 这在go中很容易实现,但其实不算太优雅,毕竟api服务器多了几条ServeFile代码,动态路由的html(指访问`/`而不是`/index.html`)和其他静态文件都由api服务器响应
+2. cli的表格打印
+   1. 如果数据单元是中文这种rune时,计算宽度时和普通的ascii是不同的
+   2. 一般的utf8.RuneCountInString计算中文字符串会得到错误的宽度,可以使用github.com/mattn/go-runewidth这个库
