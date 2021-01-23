@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	jwxt "server/backend/jwxtClient"
 	"server/backend/jwxtClient/course"
 	"server/backend/jwxtClient/util"
@@ -14,31 +13,15 @@ import (
 func TestLogin() *jwxt.JwxtClient {
 	c := jwxt.NewClient("primaryID")
 	// 尝试使用cookie登陆
-	if loginOk, _ := c.LoginWithCookies(jwxt.DEFAULT_COOKIE_PATH); loginOk {
+	if loginOk, _ := c.LoginWithCookies(); loginOk {
 		return c
 	}
 
 	loginForm := jwxt.NewLoginForm()
-	c.CasFirstGet(jwxt.DEFAULT_CAPTCHA_PATH, loginForm)
+	c.CasFirstGet(loginForm)
+	loginForm = jwxt.LoginFormCli(loginForm)
 
-	username := os.Getenv("jwxtUsername")
-	fmt.Println("输入用户名:", username)
-	if username == "" {
-		fmt.Scanf("%s\n", &username)
-	}
-	loginForm.Username = username
-
-	password := os.Getenv("jwxtPassword")
-	fmt.Println("输入密码:", password)
-	if password == "" {
-		fmt.Scanf("%s\n", &password)
-	}
-	loginForm.Password = password
-
-	fmt.Println("输入验证码:")
-	fmt.Scanf("%s\n", &loginForm.Captcha)
-
-	isLogin, err := c.Login(loginForm.ConvertToUrlVal())
+	isLogin, err := c.LoginWithForm(loginForm)
 	if !isLogin {
 		util.PanicIf(err)
 	}
@@ -49,7 +32,7 @@ func TestLogin() *jwxt.JwxtClient {
 // ok
 func TestLoadCookie() *jwxt.JwxtClient {
 	c := jwxt.NewClient("primaryID")
-	isLogin, err := c.LoginWithCookies(jwxt.DEFAULT_COOKIE_PATH)
+	isLogin, err := c.LoginWithCookies()
 	if !isLogin {
 		fmt.Println("login false:", err)
 	}
@@ -73,18 +56,18 @@ func TestCourseList(c *jwxt.JwxtClient) {
 	courses = c.ListPubElecCourse("3211", course.CAMPUS_ALL)
 	fmt.Println("某个公选", courses.CourseNames())
 
-	courses = c.ListCourse(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_GYM)
+	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_GYM)
 	fmt.Println("体育", courses.CourseNames())
 
-	courses = c.ListCourse(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_ENGLISH)
+	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_ENGLISH)
 	fmt.Println("英语", courses.CourseNames())
 
-	courses = c.ListCourse(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_OTHERS)
+	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_OTHERS)
 	fmt.Println("其他", courses.CourseNames())
 }
 
 func TestCourseOutline(c *jwxt.JwxtClient) {
-	courses := c.ListCoursePageN(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_PUB_ELECTIVE, 1)
+	courses := c.GetCourseListPage(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_PUB_ELECTIVE, 1)
 	for _, v := range courses.Courses {
 		fmt.Println("某个公选:", v.CourseName(), "剩余容量:", v.VacancyNum())
 		teachers, err := v.GetTeachers(c)

@@ -13,71 +13,75 @@ type JwxtClient struct {
 	yearTerm string
 }
 
-func NewClient(username string) *JwxtClient {
+func NewClient(UID string) *JwxtClient {
 	c := &JwxtClient{
 		HttpClient: request.NewClient(),
-		username:   username,
-		yearTerm:   "2020-2",
+		username:   UID,
+		yearTerm:   "",
 	}
 	return c
 }
 
+// 设置学期信息,并返回
 func (c *JwxtClient) GetYearTerm() string {
 	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/stuCollectedCourse/getYearTerm"
 	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
 	var resp util.NormalResp
 	request.JsonToStruct(request.Get(url).Referer(ref).Do(c).Bytes(), &resp)
 	if resp.Code != 200 {
-		log.WithField("url", url).Error("can't get year term")
+		log.WithField("url", url).Error("无法获取学期信息,使用默认:2020-2")
+		c.yearTerm = "2020-2"
 	} else {
-		log.WithField("yearterm", resp.Data).Info("get year term ok")
+		log.WithField("semester:", resp.Data).Info("学期信息")
 		c.yearTerm = resp.Data
-		return resp.Data
 	}
-	return ""
+	return c.yearTerm
 }
 
-func (c *JwxtClient) ListCourse(courseName, campusId, courseType string) *course.CourseList {
+// 获取所有页的课程
+func (c *JwxtClient) GetCourseList(courseName, campusId, courseType string) *course.CourseList {
 	option := course.NewReqOption(campusId, courseName, false)
-	req := course.NewCourseListReq(c.yearTerm, course.NewCourseType(courseType), option)
+	req := course.NewCourseListReq(course.NewCourseType(courseType), option)
 	return req.Do(c)
 }
 
-func (c *JwxtClient) ListCoursePageN(courseName, campusId, courseType string, n_pages int) *course.CourseList {
+// 获取特定页
+func (c *JwxtClient) GetCourseListPage(courseName, campusId, courseType string, pageNo int) *course.CourseList {
 	option := course.NewReqOption(campusId, courseName, false)
-	req := course.NewCourseListReq(c.yearTerm, course.NewCourseType(courseType), option)
-	return req.DoPageN(c, n_pages)
+	req := course.NewCourseListReq(course.NewCourseType(courseType), option)
+	courseList, _ := req.SetPage(pageNo).DoPage(c)
+	return courseList
 }
 
 // 公选
 func (c *JwxtClient) ListPubElecCourse(courseName, campusId string) *course.CourseList {
-	return c.ListCourse(courseName, campusId, course.TYPE_PUB_ELECTIVE)
+	return c.GetCourseList(courseName, campusId, course.TYPE_PUB_ELECTIVE)
 }
 
-// func (c *JwxtClient) ListPubOpCourseEast(courseName string) *course.CourseList {
-// 	return c.ListCourse(courseName, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
-// }
-// func (c *JwxtClient) ListPubOpCourseSZ(courseName string) *course.CourseList {
-// 	return c.ListCourse(courseName, course.CAMPUS_SZ, course.TYPE_PUB_ELECTIVE)
-// }
-// func (c *JwxtClient) ListPubOpCourseNorth(courseName string) *course.CourseList {
-// 	return c.ListCourse(courseName, course.CAMPUS_NORTH, course.TYPE_PUB_ELECTIVE)
-// }
-// func (c *JwxtClient) ListPubOpCourseSouth(courseName string) *course.CourseList {
-// 	return c.ListCourse(courseName, course.CAMPUS_SOUTH, course.TYPE_PUB_ELECTIVE)
-// }
-// func (c *JwxtClient) ListPubOpCourseZH(courseName string) *course.CourseList {
-// 	return c.ListCourse(courseName, course.CAMPUS_ZH, course.TYPE_PUB_ELECTIVE)
-// }
+func (c *JwxtClient) ListPubElecCourseEast(courseName string) *course.CourseList {
+	return c.GetCourseList(courseName, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
+}
+func (c *JwxtClient) ListPubElecCourseSZ(courseName string) *course.CourseList {
+	return c.GetCourseList(courseName, course.CAMPUS_SZ, course.TYPE_PUB_ELECTIVE)
+}
+func (c *JwxtClient) ListPubElecCourseNorth(courseName string) *course.CourseList {
+	return c.GetCourseList(courseName, course.CAMPUS_NORTH, course.TYPE_PUB_ELECTIVE)
+}
+func (c *JwxtClient) ListPubElecCourseSouth(courseName string) *course.CourseList {
+	return c.GetCourseList(courseName, course.CAMPUS_SOUTH, course.TYPE_PUB_ELECTIVE)
+}
+func (c *JwxtClient) ListPubElecCourseZH(courseName string) *course.CourseList {
+	return c.GetCourseList(courseName, course.CAMPUS_ZH, course.TYPE_PUB_ELECTIVE)
+}
 
 // 专选
 func (c *JwxtClient) ListMajElecCourse(courseName, campusId string) *course.CourseList {
-	return c.ListCourse(courseName, campusId, course.TYPE_MAJ_ELECTIVE)
+	return c.GetCourseList(courseName, campusId, course.TYPE_MAJ_ELECTIVE)
 }
 
 // 专必
 func (c *JwxtClient) ListMajCompCourse(courseName, campusId string) *course.CourseList {
-	return c.ListCourse(courseName, campusId, course.TYPE_MAJ_COMPULSORY)
+	return c.GetCourseList(courseName, campusId, course.TYPE_MAJ_COMPULSORY)
 }
 
 func (c *JwxtClient) GetCoursePhase() *course.CoursePhase {

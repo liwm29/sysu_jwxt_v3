@@ -1,15 +1,15 @@
 package course
 
-import ()
+import "errors"
 
 type CourseList struct {
 	Courses []*Course
 }
 
-func NewCourseList(yearTerm string, courseType *CourseType, courseInfos []CourseInfo) *CourseList {
-	courses := make([]*Course, 0, len(courseInfos))
-	for i := range courseInfos {
-		courses = append(courses, newCourse(yearTerm, courseType, courseInfos[i]))
+func NewCourseList(courseType *CourseType, baseInfos []CourseInfo, reqOption *ReqOption) *CourseList {
+	courses := make([]*Course, 0, len(baseInfos))
+	for i := range baseInfos {
+		courses = append(courses, newCourse(courseType, baseInfos[i], reqOption))
 	}
 	return &CourseList{courses}
 }
@@ -22,6 +22,9 @@ func (l *CourseList) CourseNames() []string {
 	return courseNames
 }
 
-func (l *CourseList) First() *Course {
-	return l.Courses[0]
+func (l *CourseList) First() (*Course, error) {
+	if len(l.Courses) > 0 {
+		return l.Courses[0], nil
+	}
+	return nil, errors.New("len(courseList.Courses) == 0,can't call First()")
 }

@@ -33,3 +33,10 @@ func GetCoursePhase(c request.Clienter) *CoursePhase {
 	return &resp.Data
 	// {"code":200,"message":null,"data":{"electiveCourseStageName":"改补选","retreatCourseStatus":"1","code":200,"semesterYear":"2020-2","courseSelectType":"0","chooseCourseStatus":"1","electiveCourseStageCode":"3","startTime":"2021-01-08 13:00:00","endTime":"2021-03-04 23:00:00","crossMajor":"1"}}
 }
+
+func (p *CoursePhase) CanSelect() bool {
+	if p.ElectiveCourseStageCode == "3" {
+		return true
+	}
+	return false
+}

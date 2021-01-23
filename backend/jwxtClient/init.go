@@ -29,8 +29,8 @@ func SetLogLevel_DEBUG() {
 // log.Panic("I'm bailing.")
 */
 
-var DEFAULT_COOKIE_PATH string = "./.cookie"
-var DEFAULT_CAPTCHA_PATH string = "./.captcha.jpg"
+var DEFAULT_COOKIE_PATH string = "./cookie"
+var DEFAULT_CAPTCHA_PATH string = "./captcha.jpg"
 
 func init() {
 	log.Out = os.Stdout

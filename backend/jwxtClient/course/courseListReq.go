@@ -6,6 +6,7 @@ import (
 	"server/backend/jwxtClient/util"
 )
 
+// 之所以这样设计,一方面是往New函数里面传option是一种风格,另一方面,也是为了可拓展性,因为请求还可以加入其他字段
 type ReqOption struct {
 	campusId         string
 	courseName       string
@@ -31,39 +32,42 @@ func (o *ReqOption) GetCourseName() string       { return o.courseName }
 func (o *ReqOption) GetCollectionStatus() string { return o.collectionStatus }
 
 type CourseListReq struct {
-	pageNo           int
-	pageSize         int
-	yearTerm         string
-	campusId         string
-	collectionStatus string
-	courseName       string
-	courseType       *CourseType
+	pageNo     int
+	pageSize   int
+	yearTerm   string
+	option     *ReqOption
+	courseType *CourseType
 }
 
-func NewCourseListReq(yearTerm string, courseType *CourseType, option *ReqOption) *CourseListReq {
+func NewCourseListReq(courseType *CourseType, option *ReqOption) *CourseListReq {
+	if option == nil {
+		option = new(ReqOption)
+	}
+	if YEAR_TERM == "" {
+		log.WithField("semester:", YEAR_TERM).Info("未设置学期 ", util.WhereAmI())
+		return nil
+	}
 	return &CourseListReq{
-		pageNo:           1,
-		pageSize:         10,
-		yearTerm:         yearTerm,
-		campusId:         option.campusId,
-		collectionStatus: option.collectionStatus,
-		courseName:       option.courseName,
-		courseType:       courseType,
+		pageNo:     1,
+		pageSize:   10,
+		yearTerm:   YEAR_TERM,
+		option:     option,
+		courseType: courseType,
 	}
 }
 
 func (r *CourseListReq) SetCampusId(campus string) *CourseListReq {
-	r.campusId = campus
+	r.option.campusId = campus
 	return r
 }
 
 func (r *CourseListReq) SetCourseName(courseName string) *CourseListReq {
-	r.courseName = courseName
+	r.option.courseName = courseName
 	return r
 }
 
 func (r *CourseListReq) SetCollection(isJustShowCollected string) *CourseListReq {
-	r.collectionStatus = isJustShowCollected
+	r.option.collectionStatus = isJustShowCollected
 	return r
 }
 
@@ -72,43 +76,31 @@ func (r *CourseListReq) IncrePage() *CourseListReq {
 	return r
 }
 
+func (r *CourseListReq) SetPage(pageNo int) *CourseListReq {
+	r.pageNo = pageNo
+	return r
+}
+
 func (r *CourseListReq) Marshall() string {
 	tpl := `{"pageNo":%d,"pageSize":%d,"param":{"semesterYear":"%s","selectedType":"%s","selectedCate":"%s","hiddenConflictStatus":"0","hiddenSelectedStatus":"0","hiddenEmptyStatus":"0","vacancySortStatus":"0","collectionStatus":"%s","campusId":"%s","courseName":"%s"}}`
-	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, r.yearTerm, r.courseType.SelectedType, r.courseType.SelectedCate, r.collectionStatus, r.campusId, r.courseName)
+	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, r.yearTerm, r.courseType.SelectedType, r.courseType.SelectedCate, r.option.collectionStatus, r.option.campusId, r.option.courseName)
 }
 
+// 返回所有课程列表,从第一页开始
 func (reqJson *CourseListReq) Do(c request.Clienter) *CourseList {
 	log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
+	courses, n_page := reqJson.SetPage(1).DoPage(c)
 
-	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list"
-	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
-	respJson := request.PostJson(url, reqJson.Marshall()).Referer(ref).Do(c).Bytes()
-
-	log.WithField("respJson", util.Truncate100(string(respJson))).Debug(util.WhereAmI())
-
-	var resp CourseListResp
-	request.JsonToStruct(respJson, &resp)
-	if resp.Code != 200 {
-		log.WithField("respJson.msg", resp.Message).Warn("get list error")
-	}
-	if resp.Code == 52021136 {
-		log.Error("黑名单")
-	}
-	totalCourses := resp.Data.Rows
-
-	n_course := resp.Data.Total
-	total_pages := n_course / 10 // 10 is one page size
-	for i := 0; i < total_pages; i++ {
-		respJson := request.PostJson(url, reqJson.IncrePage().Marshall()).Referer(ref).Do(c).Bytes()
-		var resp CourseListResp
-		request.JsonToStruct(respJson, &resp)
-		totalCourses = append(totalCourses, resp.Data.Rows...)
+	for i := 0; i < n_page; i++ {
+		courseListTmp, _ := reqJson.SetPage(i + 2).DoPage(c)
+		courses.Courses = append(courses.Courses, courseListTmp.Courses...)
 	}
 
-	return NewCourseList(reqJson.yearTerm, reqJson.courseType, totalCourses)
+	return courses
 }
 
-func (reqJson *CourseListReq) DoPageN(c request.Clienter, n_pages int) *CourseList {
+// 返回一页课程列表
+func (reqJson *CourseListReq) DoPage(c request.Clienter) (*CourseList, int) {
 	log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
 
 	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list"
@@ -116,7 +108,6 @@ func (reqJson *CourseListReq) DoPageN(c request.Clienter, n_pages int) *CourseLi
 	respJson := request.PostJson(url, reqJson.Marshall()).Referer(ref).Do(c).Bytes()
 
 	log.WithField("respJson", util.Truncate100(string(respJson))).Debug(util.WhereAmI())
-
 	var resp CourseListResp
 	request.JsonToStruct(respJson, &resp)
 	if resp.Code != 200 {
@@ -125,18 +116,8 @@ func (reqJson *CourseListReq) DoPageN(c request.Clienter, n_pages int) *CourseLi
 	if resp.Code == 52021136 {
 		log.Error("黑名单")
 	}
-	totalCourses := resp.Data.Rows
 
-	n_course := resp.Data.Total
-	var total_pages = n_course / 10 // 10 is one page size
-	n_loop := util.Min(total_pages-1, n_pages-1)
-
-	for i := 0; i < n_loop; i++ {
-		respJson := request.PostJson(url, reqJson.IncrePage().Marshall()).Referer(ref).Do(c).Bytes()
-		var resp CourseListResp
-		request.JsonToStruct(respJson, &resp)
-		totalCourses = append(totalCourses, resp.Data.Rows...)
-	}
-
-	return NewCourseList(reqJson.yearTerm, reqJson.courseType, totalCourses)
+	n_page := (resp.Data.Total + reqJson.pageSize - 1) / reqJson.pageSize
+	courseList := NewCourseList(reqJson.courseType, resp.Data.Rows, reqJson.option)
+	return courseList, n_page
 }

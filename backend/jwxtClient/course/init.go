@@ -55,6 +55,12 @@ const (
 	NAME_ALL = ""
 )
 
+var YEAR_TERM = ""
+
+func SetYearTerm(semester string) {
+	YEAR_TERM = semester
+}
+
 var log *logrus.Logger
 
 func SetLogger(logger *logrus.Logger) {
