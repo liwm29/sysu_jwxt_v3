@@ -12,35 +12,57 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"server/backend/jwxtClient/util"
+	"strings"
 )
 
 // todo: 并发加锁
 
-type CookieJar struct {
+type simpJar struct {
 	DB map[string][]*http.Cookie
 }
 
-func NewSimpleJar() *CookieJar {
-	return &CookieJar{DB: make(map[string][]*http.Cookie)}
+func NewSimpJar() *simpJar {
+	return &simpJar{DB: make(map[string][]*http.Cookie)}
 }
 
-func (j *CookieJar) SetCookies(url *url.URL, cookies []*http.Cookie) {
-	// attention: it is a stack
-	j.DB[url.Host] = append(cookies, j.DB[url.Host]...)
+func (j *simpJar) SetCookies(url *url.URL, cookies []*http.Cookie) {
+	// we don't want host:port,so strip it
+	host := url.Hostname()
+
+	if j.DB[host] == nil {
+		j.DB[host] = cookies
+		return
+	}
+
+	store := j.DB[host]
+	for _, v := range cookies {
+		if exist, pos := sliceExist(store, v); exist {
+			store = sliceDelete(store, pos)
+		}
+		store = sliceAppend(store, v)
+	}
+	j.DB[host] = store
+	// j.DB[url.Host] = append(j.DB[url.Host], cookies...)
 }
 
-func (j *CookieJar) Cookies(url *url.URL) []*http.Cookie {
-	return j.DB[url.Host]
+func (j *simpJar) Cookies(url *url.URL) []*http.Cookie {
+	matchedCookies := make([]*http.Cookie, 0, 10)
+	hostNamse := getMatchedHost(url.Hostname())
+	for _, v := range hostNamse {
+		matchedCookies = append(matchedCookies, j.DB[v]...)
+	}
+	return matchedCookies
 }
 
-func (j *CookieJar) StoreCookies(filepath string) error {
+func (j *simpJar) StoreCookies(filepath string) error {
 	cookieJson, err := json.MarshalIndent(j.DB, "", "\t")
-	util.PanicIf(err)
+	if err != nil {
+		return err
+	}
 	return ioutil.WriteFile(filepath, cookieJson, 0666)
 }
 
-func (j *CookieJar) LoadCookies(filepath string) error {
+func (j *simpJar) LoadCookies(filepath string) error {
 	cookieJson, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return err
@@ -48,9 +70,47 @@ func (j *CookieJar) LoadCookies(filepath string) error {
 	return json.Unmarshal(cookieJson, &j.DB)
 }
 
-func (j *CookieJar) Clear() {
+func (j *simpJar) Clear() {
 	// j.DB = make(map[string][]*http.Cookie)
 	for k, _ := range j.DB {
 		delete(j.DB, k)
 	}
+}
+
+func (j *simpJar) AllCookieNames() map[string][]string {
+	ret := make(map[string][]string)
+	for k, v := range j.DB {
+		ret[k] = cookie2names(v)
+	}
+	return ret
+}
+
+func sliceDelete(slice []*http.Cookie, i int) []*http.Cookie {
+	return append(slice[:i], slice[i+1:]...)
+}
+
+func sliceExist(slice []*http.Cookie, cookie *http.Cookie) (bool, int) {
+	for i := range slice {
+		if slice[i].Name == cookie.Name {
+			return true, i
+		}
+	}
+	return false, -1
+}
+
+func sliceAppend(slice []*http.Cookie, cookie ...*http.Cookie) []*http.Cookie {
+	return append(slice, cookie...)
+}
+
+func getMatchedHost(host string) []string {
+	ret := []string{host}
+	for {
+		pos := strings.Index(host, ".")
+		if pos == -1 {
+			break
+		}
+		host = host[pos+1:]
+		ret = append(ret, host)
+	}
+	return ret
 }

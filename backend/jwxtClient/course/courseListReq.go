@@ -2,6 +2,7 @@ package course
 
 import (
 	"fmt"
+	"server/backend/jwxtClient/global"
 	"server/backend/jwxtClient/request"
 	"server/backend/jwxtClient/util"
 )
@@ -34,7 +35,6 @@ func (o *ReqOption) GetCollectionStatus() string { return o.collectionStatus }
 type CourseListReq struct {
 	pageNo     int
 	pageSize   int
-	yearTerm   string
 	option     *ReqOption
 	courseType *CourseType
 }
@@ -43,14 +43,13 @@ func NewCourseListReq(courseType *CourseType, option *ReqOption) *CourseListReq 
 	if option == nil {
 		option = new(ReqOption)
 	}
-	if YEAR_TERM == "" {
-		log.WithField("semester:", YEAR_TERM).Info("未设置学期 ", util.WhereAmI())
+	if global.YEAR_TERM == "" {
+		global.Log.WithField("semester:", global.YEAR_TERM).Info("未设置学期 ", util.WhereAmI())
 		return nil
 	}
 	return &CourseListReq{
 		pageNo:     1,
 		pageSize:   10,
-		yearTerm:   YEAR_TERM,
 		option:     option,
 		courseType: courseType,
 	}
@@ -71,53 +70,54 @@ func (r *CourseListReq) SetCollection(isJustShowCollected string) *CourseListReq
 	return r
 }
 
-func (r *CourseListReq) IncrePage() *CourseListReq {
+func (r *CourseListReq) IncrePageNo() *CourseListReq {
 	r.pageNo += 1
 	return r
 }
 
-func (r *CourseListReq) SetPage(pageNo int) *CourseListReq {
+func (r *CourseListReq) SetPageNo(pageNo int) *CourseListReq {
 	r.pageNo = pageNo
 	return r
 }
 
 func (r *CourseListReq) Marshall() string {
 	tpl := `{"pageNo":%d,"pageSize":%d,"param":{"semesterYear":"%s","selectedType":"%s","selectedCate":"%s","hiddenConflictStatus":"0","hiddenSelectedStatus":"0","hiddenEmptyStatus":"0","vacancySortStatus":"0","collectionStatus":"%s","campusId":"%s","courseName":"%s"}}`
-	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, r.yearTerm, r.courseType.SelectedType, r.courseType.SelectedCate, r.option.collectionStatus, r.option.campusId, r.option.courseName)
+	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, global.YEAR_TERM, r.courseType.SelectedType, r.courseType.SelectedCate, r.option.collectionStatus, r.option.campusId, r.option.courseName)
 }
 
 // 返回所有课程列表,从第一页开始
 func (reqJson *CourseListReq) Do(c request.Clienter) *CourseList {
-	log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
-	courses, n_page := reqJson.SetPage(1).DoPage(c)
+	global.Log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
+	courses, n_page := reqJson.SetPageNo(1).DoPage(c)
 
-	for i := 0; i < n_page; i++ {
-		courseListTmp, _ := reqJson.SetPage(i + 2).DoPage(c)
+	for i := 2; i <= n_page; i++ {
+		courseListTmp, _ := reqJson.SetPageNo(i).DoPage(c)
 		courses.Courses = append(courses.Courses, courseListTmp.Courses...)
 	}
 
 	return courses
 }
 
-// 返回一页课程列表
-func (reqJson *CourseListReq) DoPage(c request.Clienter) (*CourseList, int) {
-	log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
+// 返回一页课程列表,设置courseListReq.SetPage()
+// @return 返回本页内所有课程列表,和所有页的课程数
+func (reqJson *CourseListReq) DoPage(c request.Clienter) (courseList *CourseList, n_page int) {
+	global.Log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
 
-	url := "https://jwxt.sysu.edu.cn/jwxt/choose-course-front-server/classCourseInfo/course/list"
-	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
+	url := global.HOST + "jwxt/choose-course-front-server/classCourseInfo/course/list"
+	ref := global.HOST + "jwxt/mk/courseSelection/"
 	respJson := request.PostJson(url, reqJson.Marshall()).Referer(ref).Do(c).Bytes()
 
-	log.WithField("respJson", util.Truncate100(string(respJson))).Debug(util.WhereAmI())
+	global.Log.WithField("respJson", string(respJson)).Debug(util.WhereAmI())
 	var resp CourseListResp
 	request.JsonToStruct(respJson, &resp)
 	if resp.Code != 200 {
-		log.WithField("respJson.msg", resp.Message).Warn("get list error")
+		global.Log.WithField("respJson.msg", resp.Message).Warn("get list error")
 	}
 	if resp.Code == 52021136 {
-		log.Error("黑名单")
+		global.Log.Error("黑名单")
 	}
 
-	n_page := (resp.Data.Total + reqJson.pageSize - 1) / reqJson.pageSize
-	courseList := NewCourseList(reqJson.courseType, resp.Data.Rows, reqJson.option)
+	n_page = (resp.Data.Total + reqJson.pageSize - 1) / reqJson.pageSize
+	courseList = NewCourseList(reqJson.courseType, resp.Data.Rows, reqJson.option)
 	return courseList, n_page
 }

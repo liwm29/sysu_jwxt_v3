@@ -32,7 +32,6 @@ func (resp *HttpResp) Bytes() []byte {
 
 func (resp *HttpResp) String() string {
 	if !resp.isRead {
-		resp.isRead = true
 		return string(resp.Bytes())
 	}
 

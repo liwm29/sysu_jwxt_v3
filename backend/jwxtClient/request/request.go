@@ -41,6 +41,11 @@ func (r *HttpReq) Referer(referer string) *HttpReq {
 	return r
 }
 
+func (r *HttpReq) Origin(origin string) *HttpReq {
+	r.Header.Set("Origin", origin)
+	return r
+}
+
 func (r *HttpReq) Json() *HttpReq {
 	r.Header.Set("Content-Type", "application/json;charset=UTF-8")
 	return r
@@ -56,5 +61,6 @@ type Clienter interface {
 }
 
 func (r *HttpReq) Do(c Clienter) *HttpResp {
-	return c.Do(r)
+	resp := c.Do(r)
+	return resp
 }

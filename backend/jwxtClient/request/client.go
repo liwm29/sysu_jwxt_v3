@@ -1,24 +1,20 @@
 package request
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"server/backend/jwxtClient/util"
 )
 
 type HttpClient struct {
-	Cl        *http.Client
-	CookieJar *CookieJar
+	Cl *http.Client
 }
 
 func NewClient() *HttpClient {
-	jar := NewSimpleJar()
 	c := &HttpClient{
 		Cl: &http.Client{
-			Jar: jar,
+			Jar: NewSimpJar(),
 		},
-		CookieJar: jar,
 	}
 	c.SetRedirectCallback(nil)
 	return c
@@ -30,7 +26,10 @@ func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.R
 			if len(via) > 20 {
 				return http.ErrUseLastResponse
 			} else {
-				fmt.Println("[Redirecting] via ", util.TruncateN(req.URL.Path, 40), "\t\t", "Method:", req.Method, "Cookie: ", req.Cookies())
+				if len(via) == 1 {
+					logger.Println("[  Request  ] via ", via[0].URL.String(), "\t\t", "Cookie: ", cookie2names(via[0].Cookies()))
+				}
+				logger.Println("[Redirecting] via ", req.URL.String(), "\t\t", "Cookie: ", cookie2names(req.Cookies()))
 			}
 			return nil
 		}
@@ -41,8 +40,10 @@ func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.R
 
 func (c *HttpClient) Do(req *HttpReq) *HttpResp {
 	resp, err := c.Cl.Do(req.Request)
+	respWrapper := NewResponse(resp)
 	util.PanicIf(err)
-	return NewResponse(resp)
+	LogRequest(req, respWrapper)
+	return respWrapper
 }
 
 func (c *HttpClient) Get(url string) *HttpResp {
@@ -62,8 +63,8 @@ func (c *HttpClient) PostForm(url, body string) *HttpResp {
 }
 
 func (c *HttpClient) StoreCookies(filepath string) error {
-	return c.CookieJar.StoreCookies(filepath)
+	return c.Cl.Jar.(*simpJar).StoreCookies(filepath)
 }
 func (c *HttpClient) LoadCookies(filepath string) error {
-	return c.CookieJar.LoadCookies(filepath)
+	return c.Cl.Jar.(*simpJar).LoadCookies(filepath)
 }

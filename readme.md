@@ -26,79 +26,81 @@
     └── dist
 ```
 
-## JwxtClient Functions
+## JwxtClient
+> 将/backend/jwxtClient作为一个第三方库使用
+<details>
+<summary>Example</summary>
+
 ```go
-package main
-
-import (
-	"fmt"
-	"io/ioutil"
-	jwxt "server/backend/jwxtClient"
-	"server/backend/jwxtClient/course"
-	"server/backend/jwxtClient/util"
-	"time"
-)
-
-func main() {
-	// 设置log级别
-	jwxt.SetLogLevel_INFO()
+func main(){
 	// 构造客户端
 	c := jwxt.NewClient("")
-	// 构造登陆表单
-	form := jwxt.NewLoginForm()
-	// 获取验证码
-	c.CasFirstGet(form)
-	// 登陆cli
-	_, err := c.Login()
-	util.PanicIf(err)
+	// 构造登陆表单, 获取验证码,默认将验证码图片下载到"./captcha.jpg", 登陆cli ,都被集成到了jwxtClient.Login()
+	isLogin := c.Login()
+	if isLogin {
+		fmt.Println("登陆成功")
+	} else {
+		fmt.Println("登陆失败")
+		os.Exit(0)
+	}
+
+	fmt.Println("已选课程:", course.GetSelectedCourseNames(c))
 
 	// 获取选课阶段,不在选课阶段时,不能使用
 	selectPhase := c.GetCoursePhase()
-	fmt.Printf("%#v", selectPhase)
+	fmt.Printf("选课阶段:%s %s 学期:%s 时间:%s=>%s\n",
+		selectPhase.ElectiveCourseStageCode, selectPhase.ElectiveCourseStageName, selectPhase.SemesterYear,
+		selectPhase.StartTime, selectPhase.EndTime)
 
 	// 获取课程列表,专选
 	courseList1 := c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_MAJ_ELECTIVE)
-	fmt.Printf("%#v", courseList1.CourseNames())
+	fmt.Printf("%#v\n", courseList1.CourseNames())
 	// 东校区,公选
-	courseList2 := c.GetCourseList(course.NAME_ALL, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
-	fmt.Printf("%#v", courseList2.CourseNames())
+	// courseList2 := c.GetCourseList(course.NAME_ALL, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
+	// fmt.Printf("%#v", courseList2.CourseNames()[:5])
 
 	// 单个课程,比如热门课程photoshop
 	course, err := c.GetCourseList("photoshop", course.CAMPUS_ALL, course.TYPE_PUB_ELECTIVE).First()
 	if err != nil {
-		fmt.Println("找到: ", course.VacancyInfo())
-	} else {
 		fmt.Println("未找到课程信息:", err)
+	} else {
+		fmt.Println("找到:", course.VacancyInfo())
 	}
 
+	if course == nil {
+		return
+	}
 	// 课程教师信息
 	teachers, err := course.GetTeachers(c)
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		if len(teachers) > 0 {
-			fmt.Printf("%#v", teachers)
+			fmt.Printf("课程:%s 教师信息: 姓名:%s Email:%s\n", course.CourseName(), teachers[0].Name, teachers[0].Email)
 		} else {
 			fmt.Println("无教师信息")
 		}
 	}
 
 	// 如果在选课第三阶段
-	if selectPhase.CanSelect() {
-		if course.VacancyNum() > 0 {
-			isOk := course.Choose(c)
-			fmt.Println(course.VacancyInfo(), "选课", isOk)
-		} else {
-			fmt.Println(course.VacancyInfo(), "课程已满")
-		}
+	if !selectPhase.CanSelect() {
+		util.PanicIf(errors.New("不在选课阶段" + fmt.Sprintf("%#v", selectPhase)))
+	}
+	if course.VacancyNum() > 0 {
+		isOk := course.Choose(c)
+		fmt.Println(course.VacancyInfo(), "选课", isOk)
+	} else {
+		fmt.Println(course.VacancyInfo(), "课程已满")
 	}
 
 	// 退课
-	isOk := course.Cancel(c)
-	fmt.Println(course.VacancyInfo(), "退课", isOk)
+	if course.IsSelected() {
+		isOk := course.Cancel(c)
+		fmt.Println(course.VacancyInfo(), "退课", isOk)
+	}
 
 	// 课程剩余名额
-	fmt.Println(course.VacancyInfo())
+	fmt.Println("课程容量:", course.VacancyInfo())
 
 	// 刷新课程剩余名额
 	if (course.Refresh(c)) != nil {
@@ -109,30 +111,26 @@ func main() {
 
 	// 教师照片
 	teacherId := "123456"
-	ioutil.WriteFile(teacherId+".jpg", c.GetTeacherImg(teacherId), 0666)
+	ioutil.WriteFile("teacher"+teacherId+".jpg", c.GetTeacherImg(teacherId), 0666)
 
 	// 学生照片
 	studentId := "123456"
-	ioutil.WriteFile(studentId+".jpg", c.GetTeacherImg(studentId), 0666)
+	ioutil.WriteFile("student"+studentId+".jpg", c.GetStudentImg(studentId), 0666)
 
 	// 自动选课,5s查询一次,异步
 	isOkChan := course.AutoChoose(c, time.Second*5)
 	for err := range isOkChan {
 		if err == nil {
 			fmt.Println(course.VacancyInfo(), "选课成功")
+			break
 		}
 		fmt.Println(err)
 	}
-}
 ```
-可以将/backend/jwxtClient作为一个库使用
-<!-- 
-## 待决
-1. 自己封装的httpClient,到底是应该嵌入http.Client还是组合?
-   1. 目前是用组合,否则的话无法定义同名函数
-2. Do()的返回值是用httpResp还是直接[]byte?
-3. 某些地方应该使用接口吗? 比如req.Do(interface?),否则得传值c.HttpClient
-4. 测试在test文件夹,应该用标准的go test,但是似乎go test无法得到用户输入,猜测是go test不用stdin,stdout,有时间再看看,目前直接改成main文件运行 -->
+</details>
+<br>
+
+![](static/2021-01-29-16-46-04.png)
 
 ## ChangeLog
 - 2021/01/08 初始化任务目标, 计划考试后开始
@@ -142,8 +140,12 @@ func main() {
 - 2021/01/15 增加并测试了cookie管理,迁移了登陆,选课,退课实现
 - 2021/01/17 增加并测试了查询课程列表和单一课程功能
 - 2021/01/20~2021/01/23 jwxtClient初步完成
+- 2021/01/29 修复了cookiejar的bug,添加了jwxt443的接口,可在校外通过webvpn访问jwxt
 
-## DevLog
+## OTHER
+<details>
+<summary>DevLog</summary>
+
 1. 前后端分离,肯定要分离开发,至于是否分离部署,看个人需要
    1. 如果分离部署,这是在说前端代码`npm run build`后,将`/dist`目录直接扔进nginx或tomcat,后端作为api服务器单独运行在另一个端口
       1. 由于端口不同,涉及CORS跨域资源共享问题,对xhr请求的发出没影响,主要是响应必须带有`Access-Control-Allow-Origin`,否则被浏览器拦截;dom的请求似乎直接禁止了,防止冒牌网站直接套壳iframe;具体如何,没试过
@@ -151,4 +153,5 @@ func main() {
       1. 这在go中很容易实现,但其实不算太优雅,毕竟api服务器多了几条ServeFile代码,动态路由的html(指访问`/`而不是`/index.html`)和其他静态文件都由api服务器响应
 2. cli的表格打印
    1. 如果数据单元是中文这种rune时,计算宽度时和普通的ascii是不同的
-   2. 一般的utf8.RuneCountInString计算中文字符串会得到错误的宽度,可以使用github.com/mattn/go-runewidth这个库
+   2. 一般的utf8.RuneCountInString计算中文字符串会得到错误的宽度,可以使用 github.com/mattn/go-runewidth 这个库
+</details>

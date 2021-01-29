@@ -81,7 +81,6 @@ func TestCourseOutline(c *jwxt.JwxtClient) {
 func main() {
 	// jwxt.SetLogLevel_INFO()
 	c := TestLogin()
-
 	TestGetBaseInfo(c)
 	TestCourseList(c)
 	TestCourseOutline(c)

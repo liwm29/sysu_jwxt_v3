@@ -1,7 +1,5 @@
 package course
 
-import "github.com/sirupsen/logrus"
-
 var (
 	_campus_id = map[string]string{
 		"东校园":  "5063559",
@@ -34,17 +32,6 @@ const (
 	CAMPUS_ZH    = "5062203"
 	CAMPUS_ALL   = ""
 
-	// TYPE_MAJOR      = "1"
-	// TYPE_PUBLIC     = "4"
-	// TYPE_CROSSMAJOR = "2"
-
-	// CATE_COMPULSORY      = "11"
-	// CATE_ELECTIVE        = "21"
-	// CATE_SCHOOL_ELECTIVE = "30"
-	// CATE_GYM             = "10"
-	// CATE_ENGLISH         = "10"
-	// CATE_OTHERS           = "10"
-
 	TYPE_PUB_ELECTIVE   = "公选"
 	TYPE_MAJ_ELECTIVE   = "专选"
 	TYPE_MAJ_COMPULSORY = "专必"
@@ -54,18 +41,3 @@ const (
 
 	NAME_ALL = ""
 )
-
-var YEAR_TERM = ""
-
-func SetYearTerm(semester string) {
-	YEAR_TERM = semester
-}
-
-var log *logrus.Logger
-
-func SetLogger(logger *logrus.Logger) {
-	log = logger
-}
-
-func init() {
-}

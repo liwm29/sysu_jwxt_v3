@@ -3,13 +3,13 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"server/backend/jwxtClient/util"
-
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/rodaine/table"
+	"io/ioutil"
+	"net/http"
+	"server/backend/jwxtClient/util"
 )
 
 var JsonParseErrFilePath = "jsonParseFailSrcData.log"
@@ -39,8 +39,8 @@ func JsonToStruct(data []byte, v interface{}) {
 	JsonErr(json.Unmarshal(data, v), data)
 }
 
-func JsonConvert(data []byte, v interface{}) {
-	JsonErr(json.Unmarshal(data, v), data)
+func JsonConvert(data []byte, v interface{}) error {
+	return json.Unmarshal(data, v)
 }
 
 // 403
@@ -102,4 +102,18 @@ func printParseErrDetailMsg(data []byte) {
 	}
 	tab.AddRow(dataType, details, suggest)
 	tab.Print()
+}
+
+func cookie2names(cookies []*http.Cookie) []string {
+	ret := make([]string, 0, len(cookies))
+	for _, v := range cookies {
+		ret = append(ret, v.Name)
+	}
+	return ret
+}
+
+func LogRequest(req *HttpReq, resp *HttpResp) {
+	logger.Println("reqUrl=", req.Request.URL.String(), "reqCookie=", cookie2names(req.Cookies()),
+		"respSetCookie=", resp.Header.Get("Set-Cookie"), "resp=", resp.String())
+	// color.Blue("request.url=", req.Request.URL.String(), "cookie=", cookie2names(req.Cookies()))
 }

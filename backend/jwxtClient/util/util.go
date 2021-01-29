@@ -1,13 +1,16 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/fatih/color"
-	"github.com/rodaine/table"
 	"math"
 	"os"
 	"runtime"
 	"strconv"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 )
 
 type NormalResp struct {
@@ -67,4 +70,11 @@ func AtoI(number string) int {
 func Min(a int, b int) int {
 	x := math.Min(float64(a), float64(b))
 	return int(x)
+}
+
+func IsAccessForbidden(data []byte) bool {
+	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
+	PanicIf(err)
+	text, _ := dom.Find("title").Html()
+	return text == "资源或业务被限制访问  Access Forbidden"
 }

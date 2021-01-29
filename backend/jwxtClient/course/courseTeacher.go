@@ -2,6 +2,7 @@ package course
 
 import (
 	"errors"
+	"server/backend/jwxtClient/global"
 	"server/backend/jwxtClient/request"
 	"server/backend/jwxtClient/util"
 )
@@ -91,10 +92,10 @@ type teacherInfo struct {
 }
 
 func (c *Course) GetTeachers(cl request.Clienter) ([]teacherInfo, error) {
-	url := "https://jwxt.sysu.edu.cn/jwxt/training-programe/courseoutline/getalloutlineinfo?courseNum=" + c.BaseInfo.CourseNum
-	ref := "https://jwxt.sysu.edu.cn/jwxt/mk/courseSelection/"
+	url := global.HOST + "jwxt/training-programe/courseoutline/getalloutlineinfo?courseNum=" + c.BaseInfo.CourseNum
+	ref := global.HOST + "jwxt/mk/courseSelection/"
 	respJson := request.Get(url).Referer(ref).Do(cl).Bytes()
-	log.WithField("respJson", util.Truncate100(string(respJson))).Debug(util.WhereAmI())
+	global.Log.WithField("respJson", util.Truncate100(string(respJson))).Debug(util.WhereAmI())
 	// 首先检查是否有大纲信息 {"code":52000000,"message":"未查询到大纲信息"}
 	m := request.JsonToMap(respJson)
 	if m["code"].(float64) == 52000000 {
