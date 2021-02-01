@@ -1,9 +1,7 @@
 .vscode
 vue-el-admin/
-frontend/dist/
+frontend/dist/*
+!frontend/dist/.gitkeep
 sysu_jwxt_v2/
 backend/jwxtClient/test/cookie
 backend/jwxtClient/test/captcha.jpg
-server.exe
-
-! frontend/dist/.gitkeep
