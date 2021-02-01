@@ -19,11 +19,18 @@
 .
 ├── backend
 │   ├── jwxtClient
-│        ├─request
-│        └─test
+│   │  ├─client
+│		│	 ├─course
+│		│	 ├─example
+│		│	 ├─global
+│		│	 ├─request
+│		│	 ├─student
+│		│	 ├─teacher
+│		│	 ├─test
+│		│	 └─util
 │   └── proxyServer
 └── frontend
-    └── dist
+     └── dist
 ```
 
 ## JwxtClient
@@ -32,6 +39,18 @@
 <summary>Example</summary>
 
 ```go
+import (
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
+	jwxtClient "server/backend/jwxtClient/client"
+	"server/backend/jwxtClient/course"
+	"server/backend/jwxtClient/global"
+	"server/backend/jwxtClient/util"
+	"time"
+)
+
 func main(){
 	// 构造客户端
 	c := jwxt.NewClient("")

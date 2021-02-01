@@ -2,9 +2,9 @@ package course
 
 import (
 	"fmt"
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/request"
-	"server/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 )
 
 // 之所以这样设计,一方面是往New函数里面传option是一种风格,另一方面,也是为了可拓展性,因为请求还可以加入其他字段

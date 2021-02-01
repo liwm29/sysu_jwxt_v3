@@ -1,8 +1,7 @@
 package client
 
 import (
-	"server/backend/jwxtClient/global"
-
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
 	"github.com/fatih/color"
 )
 

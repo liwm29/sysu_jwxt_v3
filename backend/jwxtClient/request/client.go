@@ -3,7 +3,6 @@ package request
 import (
 	"io"
 	"net/http"
-	"server/backend/jwxtClient/util"
 )
 
 type HttpClient struct {
@@ -41,7 +40,7 @@ func (c *HttpClient) SetRedirectCallback(f func(req *http.Request, via []*http.R
 func (c *HttpClient) Do(req *HttpReq) *HttpResp {
 	resp, err := c.Cl.Do(req.Request)
 	respWrapper := NewResponse(resp)
-	util.PanicIf(err)
+	PanicIf(err)
 	LogRequest(req, respWrapper)
 	return respWrapper
 }

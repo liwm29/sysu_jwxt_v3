@@ -8,8 +8,9 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/rodaine/table"
 	"io/ioutil"
-	"net/http"
-	"server/backend/jwxtClient/util"
+	"os"
+	"runtime"
+	"strconv"
 )
 
 var JsonParseErrFilePath = "jsonParseFailSrcData.log"
@@ -18,14 +19,14 @@ func JsonErr(err error, data []byte) {
 	if err != nil {
 		ioutil.WriteFile(JsonParseErrFilePath, data, 0666)
 		printParseErrDetailMsg(data)
-		util.PanicIf(err)
+		PanicIf(err)
 	}
 }
 
 func ReactIf(err error, f func()) {
 	if err != nil {
 		f()
-		util.PanicIf(err)
+		PanicIf(err)
 	}
 }
 
@@ -46,7 +47,7 @@ func JsonConvert(data []byte, v interface{}) error {
 // 403
 func is403Forbidden(data []byte) bool {
 	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
-	util.PanicIf(err)
+	PanicIf(err)
 	text, err := dom.Find("head > title:nth-child(1)").Html()
 	if err != nil {
 		return false
@@ -60,7 +61,7 @@ func is403Forbidden(data []byte) bool {
 // 不对外网开放
 func isAccessForbidden(data []byte) bool {
 	dom, err := goquery.NewDocumentFromReader(bytes.NewReader(data))
-	util.PanicIf(err)
+	PanicIf(err)
 	text, err := dom.Find("title").Html()
 	if err != nil {
 		return false
@@ -104,16 +105,40 @@ func printParseErrDetailMsg(data []byte) {
 	tab.Print()
 }
 
-func cookie2names(cookies []*http.Cookie) []string {
-	ret := make([]string, 0, len(cookies))
-	for _, v := range cookies {
-		ret = append(ret, v.Name)
-	}
-	return ret
-}
-
 func LogRequest(req *HttpReq, resp *HttpResp) {
 	logger.Println("reqUrl=", req.Request.URL.String(), "reqCookie=", cookie2names(req.Cookies()),
 		"respSetCookie=", resp.Header.Get("Set-Cookie"), "resp=", resp.String())
 	// color.Blue("request.url=", req.Request.URL.String(), "cookie=", cookie2names(req.Cookies()))
+}
+
+func PanicIf(err error) {
+	if err == nil {
+		return
+	}
+
+	color.Red("Error catched: %s", err.Error())
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
+	tab := table.New("# Traceback", "Func", "# Line")
+	tab.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	for i := 0; i < 10; i++ {
+		pc, _, line, _ := runtime.Caller(i)
+		f := runtime.FuncForPC(pc)
+		tab.AddRow("Error stack"+itoa(i), f.Name(), line)
+		if f.Name() == "main.main" {
+			break
+		}
+	}
+	tab.Print()
+	os.Exit(0)
+}
+
+func itoa(number int) string {
+	return strconv.Itoa(number)
+}
+
+func atoi(number string) int {
+	i, err := strconv.Atoi(number)
+	PanicIf(err)
+	return i
 }

@@ -1,8 +1,8 @@
 package teacher
 
 import (
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
 )
 
 func (t *teacher) GetImg(c request.Clienter) []byte {

@@ -3,14 +3,13 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 	"math"
 	"os"
 	"runtime"
 	"strconv"
-
-	"github.com/PuerkitoBio/goquery"
-	"github.com/fatih/color"
-	"github.com/rodaine/table"
 )
 
 type NormalResp struct {

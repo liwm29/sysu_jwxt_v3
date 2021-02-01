@@ -3,6 +3,8 @@
 这使得我们无法dump cookie,因此只能自己实现一个简单的cookiejar作为代替.
 这个cookiejar并没有模拟浏览器实现cookie的管理,而只是简单的存储.
 如果想实现一个完整的cookie管理模块,将标准库的实现拷贝过来即可
+
+最好的实现应该是container/list,但是list没办法json.marshall
 */
 
 package request
@@ -111,6 +113,14 @@ func getMatchedHost(host string) []string {
 		}
 		host = host[pos+1:]
 		ret = append(ret, host)
+	}
+	return ret
+}
+
+func cookie2names(cookies []*http.Cookie) []string {
+	ret := make([]string, 0, len(cookies))
+	for _, v := range cookies {
+		ret = append(ret, v.Name)
 	}
 	return ret
 }

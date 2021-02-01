@@ -2,15 +2,11 @@ package client
 
 import (
 	"errors"
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/request"
-	"server/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 )
 
-/*
- * portal.sysu.edu.cn
- * 非侵入式
- */
 
 const (
 	jwxt443Host string = "https://jwxt-443.webvpn.sysu.edu.cn/"

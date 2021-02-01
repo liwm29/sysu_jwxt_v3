@@ -6,10 +6,9 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/request"
-	"server/backend/jwxtClient/util"
-
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fatih/color"
 )

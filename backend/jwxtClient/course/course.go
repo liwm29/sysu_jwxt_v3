@@ -3,9 +3,9 @@ package course
 import (
 	"errors"
 	"fmt"
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/request"
-	"server/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 	"strings"
 )
 
