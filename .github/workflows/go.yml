@@ -1,4 +1,4 @@
-name: Go
+name: Lint
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
 
           # Optional: golangci-lint command line arguments.
           args:
-            --issues-exit-code=0
+            # --issues-exit-code=0
             -e=EXC0001
           # Optional: show only new issues if it's a pull request. The default value is `false`.
           # only-new-issues: true
