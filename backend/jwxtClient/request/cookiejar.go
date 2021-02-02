@@ -74,7 +74,7 @@ func (j *simpJar) LoadCookies(filepath string) error {
 
 func (j *simpJar) Clear() {
 	// j.DB = make(map[string][]*http.Cookie)
-	for k, _ := range j.DB {
+	for k := range j.DB {
 		delete(j.DB, k)
 	}
 }
