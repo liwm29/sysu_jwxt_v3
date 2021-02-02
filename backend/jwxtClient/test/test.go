@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	jwxt "github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/client"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
 	"io/ioutil"
-	jwxt "server/backend/jwxtClient"
-	"server/backend/jwxtClient/course"
-	"server/backend/jwxtClient/util"
 	// "testing"
 )
 
@@ -21,10 +20,8 @@ func TestLogin() *jwxt.JwxtClient {
 	c.CasFirstGet(loginForm)
 	loginForm = jwxt.LoginFormCli(loginForm)
 
-	isLogin, err := c.LoginWithForm(loginForm)
-	if !isLogin {
-		util.PanicIf(err)
-	}
+	c.LoginWithForm(loginForm)
+
 	c.StoreCookies(jwxt.DEFAULT_COOKIE_PATH)
 	return c
 }

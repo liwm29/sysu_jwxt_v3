@@ -3,5 +3,5 @@ vue-el-admin/
 frontend/dist/*
 !frontend/dist/.gitkeep
 sysu_jwxt_v2/
-backend/jwxtClient/test/cookie
-backend/jwxtClient/test/captcha.jpg
+backend/jwxtClient/test/*
+!backend/jwxtClient/test/test.go

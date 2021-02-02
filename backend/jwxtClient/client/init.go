@@ -10,7 +10,7 @@ var DEFAULT_CAPTCHA_PATH string = "./captcha.jpg"
 
 func printVersion() {
 	color.Cyan("[ You are using SYSU-JWXT-VERSION3 ]")
-	color.Cyan("[ working as a three-party package ]")
+	color.Cyan("[ working as a third-party package ]")
 	switch global.MODE {
 	case MODE_JWXT:
 		color.HiYellow("MODE:MODE_JWXT  HOST:%s", global.HOST)

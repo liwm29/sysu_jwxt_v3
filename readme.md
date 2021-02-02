@@ -39,21 +39,25 @@
 <summary>Example</summary>
 
 ```go
+package main
+
 import (
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	jwxtClient "server/backend/jwxtClient/client"
-	"server/backend/jwxtClient/course"
-	"server/backend/jwxtClient/global"
-	"server/backend/jwxtClient/util"
+	jwxtClient "github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/client"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 	"time"
 )
 
-func main(){
+func main() {
+	// 设置log级别
+	global.SetLogLevel_DEBUG()
 	// 构造客户端
-	c := jwxt.NewClient("")
+	c := jwxtClient.NewClient("")
 	// 构造登陆表单, 获取验证码,默认将验证码图片下载到"./captcha.jpg", 登陆cli ,都被集成到了jwxtClient.Login()
 	isLogin := c.Login()
 	if isLogin {
@@ -145,6 +149,8 @@ func main(){
 		}
 		fmt.Println(err)
 	}
+}
+
 ```
 </details>
 <br>

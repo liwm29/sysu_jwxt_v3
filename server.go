@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"server/backend/proxyServer"
+	"github.com/liwm29/sysu_jwxt_v3/backend/proxyServer"
 )
 
 func check(err error) {

@@ -38,8 +38,5 @@ func GetCoursePhase(c request.Clienter) *CoursePhase {
 }
 
 func (p *CoursePhase) CanSelect() bool {
-	if p.ElectiveCourseStageCode == "3" {
-		return true
-	}
-	return false
+	return  p.ElectiveCourseStageCode == "3" 
 }
