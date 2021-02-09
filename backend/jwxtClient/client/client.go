@@ -29,8 +29,8 @@ func (c *JwxtClient) GetYearTerm() string {
 	var resp util.NormalResp
 	request.JsonToStruct(request.Get(url).Referer(ref).Do(c).Bytes(), &resp)
 	if resp.Code != 200 {
-		global.Log.WithField("url", url).Error("无法获取学期信息,使用默认:2020-2")
-		global.YEAR_TERM = "2020-2"
+		global.Log.WithField("url", url).Error("无法获取学期信息,使用默认:NULL")
+		global.YEAR_TERM = "NULL"
 	} else {
 		global.Log.WithField("semester:", resp.Data).Info("学期信息")
 		global.YEAR_TERM = resp.Data
@@ -39,33 +39,31 @@ func (c *JwxtClient) GetYearTerm() string {
 }
 
 // 获取所有页的课程
-func (c *JwxtClient) GetCourseList(courseName, campusId, courseType string) *course.CourseList {
-	option := course.NewReqOption(campusId, courseName, false)
-	req := course.NewCourseListReq(course.NewCourseType(courseType), option)
+func (c *JwxtClient) ListCourse(courseType string, opts ...course.ReqOptionSetter) *course.CourseList {
+	req := course.NewCourseListReq(course.NewCourseType(courseType), opts...)
 	return req.Do(c)
 }
 
 // 获取特定页
-func (c *JwxtClient) GetCourseListPage(courseName, campusId, courseType string, pageNo int) *course.CourseList {
-	option := course.NewReqOption(campusId, courseName, false)
-	req := course.NewCourseListReq(course.NewCourseType(courseType), option)
+func (c *JwxtClient) ListCourseWithPage(courseType string, pageNo int, opts ...course.ReqOptionSetter) *course.CourseList {
+	req := course.NewCourseListReq(course.NewCourseType(courseType), opts...)
 	courseList, _ := req.SetPageNo(pageNo).DoPage(c)
 	return courseList
 }
 
 // 公选
-func (c *JwxtClient) ListPubElecCourse(courseName, campusId string) *course.CourseList {
-	return c.GetCourseList(courseName, campusId, course.TYPE_PUB_ELECTIVE)
+func (c *JwxtClient) ListPubElecCourse(opts ...course.ReqOptionSetter) *course.CourseList {
+	return c.ListCourse(course.TYPE_PUB_ELECTIVE, opts...)
 }
 
 // 专选
-func (c *JwxtClient) ListMajElecCourse(courseName, campusId string) *course.CourseList {
-	return c.GetCourseList(courseName, campusId, course.TYPE_MAJ_ELECTIVE)
+func (c *JwxtClient) ListMajElecCourse(opts ...course.ReqOptionSetter) *course.CourseList {
+	return c.ListCourse(course.TYPE_MAJ_ELECTIVE, opts...)
 }
 
 // 专必
-func (c *JwxtClient) ListMajCompCourse(courseName, campusId string) *course.CourseList {
-	return c.GetCourseList(courseName, campusId, course.TYPE_MAJ_COMPULSORY)
+func (c *JwxtClient) ListMajCompCourse(opts ...course.ReqOptionSetter) *course.CourseList {
+	return c.ListCourse(course.TYPE_MAJ_COMPULSORY, opts...)
 }
 
 func (c *JwxtClient) GetCoursePhase() *course.CoursePhase {

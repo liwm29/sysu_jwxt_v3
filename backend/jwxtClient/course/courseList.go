@@ -6,7 +6,7 @@ type CourseList struct {
 	Courses []*Course
 }
 
-func NewCourseList(courseType *CourseType, baseInfos []CourseInfo, reqOption *ReqOption) *CourseList {
+func NewCourseList(courseType *CourseType, baseInfos []CourseInfo, reqOption ReqOptions) *CourseList {
 	courses := make([]*Course, 0, len(baseInfos))
 	for i := range baseInfos {
 		courses = append(courses, newCourse(courseType, baseInfos[i], reqOption))

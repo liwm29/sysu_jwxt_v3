@@ -44,27 +44,27 @@ func TestGetBaseInfo(c *jwxt.JwxtClient) {
 
 func TestCourseList(c *jwxt.JwxtClient) {
 	// 查课
-	courses := c.ListMajElecCourse(course.NAME_ALL, course.CAMPUS_ALL)
+	courses := c.ListMajElecCourse()
 	fmt.Println("专选", courses.CourseNames())
 
-	courses = c.ListMajCompCourse(course.NAME_ALL, course.CAMPUS_ALL)
+	courses = c.ListMajCompCourse()
 	fmt.Println("专必", courses.CourseNames())
 
-	courses = c.ListPubElecCourse("3211", course.CAMPUS_ALL)
+	courses = c.ListPubElecCourse(course.WithCourseName("3211"))
 	fmt.Println("某个公选", courses.CourseNames())
 
-	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_GYM)
+	courses = c.ListCourse(course.TYPE_GYM)
 	fmt.Println("体育", courses.CourseNames())
 
-	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_ENGLISH)
+	courses = c.ListCourse(course.TYPE_ENGLISH)
 	fmt.Println("英语", courses.CourseNames())
 
-	courses = c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_OTHERS)
+	courses = c.ListCourse(course.TYPE_OTHERS)
 	fmt.Println("其他", courses.CourseNames())
 }
 
 func TestCourseOutline(c *jwxt.JwxtClient) {
-	courses := c.GetCourseListPage(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_PUB_ELECTIVE, 1)
+	courses := c.ListCourseWithPage(course.TYPE_PUB_ELECTIVE, 1)
 	for _, v := range courses.Courses {
 		fmt.Println("某个公选:", v.CourseName(), "剩余容量:", v.VacancyNum())
 		teachers, err := v.GetTeachers(c)

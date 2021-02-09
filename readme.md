@@ -157,6 +157,51 @@ func main() {
 
 ![](static/2021-01-29-16-46-04.png)
 
+## Lint
+`golangci-lint run -D errcheck -D varcheck -D deadcode -D unused`
+
+## Design
+<details>
+<summary>构造函数多可选参数设计</summary>
+
+```go
+type reqOptionSetFunc func(*ReqOptions) ReqOptionSetter
+
+// for further expansion ,use struct to wrap
+type ReqOptionSetter struct {
+	// value interface{}
+	f reqOptionSetFunc
+}
+
+func (r *ReqOptionSetter) apply(ropts *ReqOptions) {
+	r.f(ropts)
+}
+
+func WithCampus(campusId string) ReqOptionSetter {
+	return ReqOptionSetter{
+		func(ro *ReqOptions) ReqOptionSetter {
+			prev := ro.campusId
+			ro.campusId = campusId
+			return WithCampus(prev)
+		},
+	}
+}
+
+func NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseListReq {
+	req := &CourseListReq{
+		pageNo:     1,
+		pageSize:   10,
+		options:    defaultReqOptions(),
+		courseType: courseType,
+	}
+	for _, o := range opts {
+		o.apply(&req.options)
+	}
+	return req
+}
+```
+</details>
+
 ## ChangeLog
 - 2021/01/08 初始化任务目标, 计划考试后开始
 - 2021/01/09 决定前后端分离的模式为:分开开发,合并部署,见 DevLog#1 ,添加了部署代码
@@ -166,6 +211,7 @@ func main() {
 - 2021/01/17 增加并测试了查询课程列表和单一课程功能
 - 2021/01/20~2021/01/23 jwxtClient初步完成
 - 2021/01/29 修复了cookiejar的bug,添加了jwxt443的接口,可在校外通过webvpn访问jwxt
+- 2021/02/09 修改了
 
 ## OTHER
 <details>

@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
 	jwxtClient "github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/client"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -35,23 +35,26 @@ func main() {
 		selectPhase.StartTime, selectPhase.EndTime)
 
 	// 获取课程列表,专选
-	courseList1 := c.GetCourseList(course.NAME_ALL, course.CAMPUS_ALL, course.TYPE_MAJ_ELECTIVE)
+	courseList1 := c.ListCourse(course.TYPE_MAJ_ELECTIVE)
+	// equal to
+	// courseList1 := c.GetCourseList(course.TYPE_MAJ_ELECTIVE, course.WithCampus(course.CAMPUS_ALL), course.WithCourseName(course.TYPE_MAJ_ELECTIVE))
 	fmt.Printf("%#v\n", courseList1.CourseNames())
+
 	// 东校区,公选
-	// courseList2 := c.GetCourseList(course.NAME_ALL, course.CAMPUS_EAST, course.TYPE_PUB_ELECTIVE)
+	// courseList2 := c.ListPubElecCourse(course.WithCampus(course.CAMPUS_EAST))
 	// fmt.Printf("%#v", courseList2.CourseNames()[:5])
 
 	// 单个课程,比如热门课程photoshop
-	course, err := c.GetCourseList("photoshop", course.CAMPUS_ALL, course.TYPE_PUB_ELECTIVE).First()
+	course, err := c.ListPubElecCourse(course.WithCourseName("photoshop")).First()
+	// equal to
+	// course, err := c.ListCourse(course.TYPE_PUB_ELECTIVE, course.WithCourseName("photoshop")).First()
+
 	if err != nil {
 		fmt.Println("未找到课程信息:", err)
 	} else {
 		fmt.Println("找到:", course.VacancyInfo())
 	}
 
-	if course == nil {
-		return
-	}
 	// 课程教师信息
 	teachers, err := course.GetTeachers(c)
 	if err != nil {

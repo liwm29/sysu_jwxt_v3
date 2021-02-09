@@ -1,14 +1,6 @@
 package course
 
 var (
-	_campus_id = map[string]string{
-		"东校园":  "5063559",
-		"北校园":  "5062202",
-		"南校园":  "5062201",
-		"深圳校区": "333291143",
-		"珠海校区": "5062203",
-		"所有校区": "",
-	}
 	_selectedType = map[string]string{
 		"本专业":  "1",
 		"校级公选": "4",

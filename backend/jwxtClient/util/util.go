@@ -3,13 +3,15 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/fatih/color"
-	"github.com/rodaine/table"
 	"math"
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/fatih/color"
+	"github.com/rodaine/table"
 )
 
 type NormalResp struct {
@@ -64,6 +66,22 @@ func AtoI(number string) int {
 	i, err := strconv.Atoi(number)
 	PanicIf(err)
 	return i
+}
+
+func Bool2Str(is bool) string {
+	if is {
+		return "1"
+	} else {
+		return "0"
+	}
+}
+
+func Str2Bool(is string) bool {
+	if is == "" || is == "0" || strings.ToLower(is) == "null" {
+		return false
+	} else {
+		return true
+	}
 }
 
 func Min(a int, b int) int {

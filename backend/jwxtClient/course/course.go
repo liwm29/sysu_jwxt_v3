@@ -11,11 +11,11 @@ import (
 
 type Course struct {
 	CourseType *CourseType
-	Option     *ReqOption
+	Option     ReqOptions
 	BaseInfo   CourseInfo
 }
 
-func newCourse(courseType *CourseType, baseInfo CourseInfo, reqOption *ReqOption) *Course {
+func newCourse(courseType *CourseType, baseInfo CourseInfo, reqOption ReqOptions) *Course {
 	return &Course{
 		CourseType: courseType,
 		Option:     reqOption,
@@ -113,7 +113,7 @@ func (c *Course) VacancyInfo() string {
 }
 
 func (c *Course) Refresh(cl request.Clienter) error {
-	req := NewCourseListReq(c.CourseType, c.Option).SetCourseName(c.BaseInfo.CourseNum)
+	req := NewCourseListReq(c.CourseType, WithCourseName(c.BaseInfo.CourseNum))
 	courseList, n_page := req.DoPage(cl)
 	if n_page != 1 || len(courseList.Courses) != 1 {
 		global.Log.WithField("n_page", n_page).Info("注意:查询到不止一个页面或不止一个课程\t", util.WhereAmI())

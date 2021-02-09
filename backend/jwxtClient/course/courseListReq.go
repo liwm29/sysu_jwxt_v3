@@ -8,67 +8,106 @@ import (
 )
 
 // 之所以这样设计,一方面是往New函数里面传option是一种风格,另一方面,也是为了可拓展性,因为请求还可以加入其他字段
-type ReqOption struct {
+type ReqOptions struct {
 	campusId         string
 	courseName       string
 	collectionStatus string
 }
 
-func NewReqOption(campusId, courseName string, collectionStatus bool) *ReqOption {
-	var collected string
-	if collectionStatus {
-		collected = "1"
-	} else {
-		collected = "0"
-	}
-	return &ReqOption{
-		campusId:         campusId,
-		courseName:       courseName,
-		collectionStatus: collected,
+func defaultReqOptions() ReqOptions {
+	return ReqOptions{
+		campusId:         "",
+		courseName:       "",
+		collectionStatus: "",
 	}
 }
 
-func (o *ReqOption) GetCampusId() string         { return o.campusId }
-func (o *ReqOption) GetCourseName() string       { return o.courseName }
-func (o *ReqOption) GetCollectionStatus() string { return o.collectionStatus }
+type reqOptionSetFunc func(*ReqOptions) ReqOptionSetter
+
+// for further expansion ,use struct to wrap
+type ReqOptionSetter struct {
+	// value interface{}
+	f reqOptionSetFunc
+}
+
+func (r *ReqOptionSetter) apply(ropts *ReqOptions) {
+	r.f(ropts)
+}
+
+func WithCampus(campusId string) ReqOptionSetter {
+	return ReqOptionSetter{
+		func(ro *ReqOptions) ReqOptionSetter {
+			prev := ro.campusId
+			ro.campusId = campusId
+			return WithCampus(prev)
+		},
+	}
+}
+
+func WithCourseName(courseName string) ReqOptionSetter {
+	return ReqOptionSetter{
+		func(ro *ReqOptions) ReqOptionSetter {
+			prev := ro.courseName
+			ro.courseName = courseName
+			return WithCourseName(prev)
+		},
+	}
+}
+
+func WithShowCollected(isOnlyShowCollected bool) ReqOptionSetter {
+	return ReqOptionSetter{
+		func(ro *ReqOptions) ReqOptionSetter {
+			prev := ro.collectionStatus
+			ro.collectionStatus = util.Bool2Str(isOnlyShowCollected)
+			return WithShowCollected(util.Str2Bool(prev))
+		},
+	}
+}
+
+func (o *ReqOptions) GetCampusId() string         { return o.campusId }
+func (o *ReqOptions) GetCourseName() string       { return o.courseName }
+func (o *ReqOptions) GetCollectionStatus() string { return o.collectionStatus }
 
 type CourseListReq struct {
 	pageNo     int
 	pageSize   int
-	option     *ReqOption
+	options    ReqOptions
 	courseType *CourseType
 }
 
-func NewCourseListReq(courseType *CourseType, option *ReqOption) *CourseListReq {
-	if option == nil {
-		option = new(ReqOption)
-	}
+func NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseListReq {
 	if global.YEAR_TERM == "" {
 		global.Log.WithField("semester:", global.YEAR_TERM).Info("未设置学期 ", util.WhereAmI())
 		return nil
 	}
-	return &CourseListReq{
+
+	req := &CourseListReq{
 		pageNo:     1,
 		pageSize:   10,
-		option:     option,
+		options:    defaultReqOptions(),
 		courseType: courseType,
 	}
+	for _, o := range opts {
+		o.apply(&req.options)
+	}
+
+	return req
 }
 
-func (r *CourseListReq) SetCampusId(campus string) *CourseListReq {
-	r.option.campusId = campus
-	return r
-}
+// func (r *CourseListReq) SetCampusId(campus string) *CourseListReq {
+// 	r.options.campusId = campus
+// 	return r
+// }
 
-func (r *CourseListReq) SetCourseName(courseName string) *CourseListReq {
-	r.option.courseName = courseName
-	return r
-}
+// func (r *CourseListReq) SetCourseName(courseName string) *CourseListReq {
+// 	r.options.courseName = courseName
+// 	return r
+// }
 
-func (r *CourseListReq) SetCollection(isJustShowCollected string) *CourseListReq {
-	r.option.collectionStatus = isJustShowCollected
-	return r
-}
+// func (r *CourseListReq) SetCollection(isJustShowCollected string) *CourseListReq {
+// 	r.options.collectionStatus = isJustShowCollected
+// 	return r
+// }
 
 func (r *CourseListReq) IncrePageNo() *CourseListReq {
 	r.pageNo += 1
@@ -82,7 +121,7 @@ func (r *CourseListReq) SetPageNo(pageNo int) *CourseListReq {
 
 func (r *CourseListReq) Marshall() string {
 	tpl := `{"pageNo":%d,"pageSize":%d,"param":{"semesterYear":"%s","selectedType":"%s","selectedCate":"%s","hiddenConflictStatus":"0","hiddenSelectedStatus":"0","hiddenEmptyStatus":"0","vacancySortStatus":"0","collectionStatus":"%s","campusId":"%s","courseName":"%s"}}`
-	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, global.YEAR_TERM, r.courseType.SelectedType, r.courseType.SelectedCate, r.option.collectionStatus, r.option.campusId, r.option.courseName)
+	return fmt.Sprintf(tpl, r.pageNo, r.pageSize, global.YEAR_TERM, r.courseType.SelectedType, r.courseType.SelectedCate, r.options.collectionStatus, r.options.campusId, r.options.courseName)
 }
 
 // 返回所有课程列表,从第一页开始
@@ -118,6 +157,6 @@ func (reqJson *CourseListReq) DoPage(c request.Clienter) (courseList *CourseList
 	}
 
 	n_page = (resp.Data.Total + reqJson.pageSize - 1) / reqJson.pageSize
-	courseList = NewCourseList(reqJson.courseType, resp.Data.Rows, reqJson.option)
+	courseList = NewCourseList(reqJson.courseType, resp.Data.Rows, reqJson.options)
 	return courseList, n_page
 }
