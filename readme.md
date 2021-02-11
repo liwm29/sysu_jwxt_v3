@@ -162,28 +162,46 @@ func main() {
 
 ## Design
 <details>
-<summary>构造函数多可选参数设计</summary>
+<summary>option struct -> funcional option</summary>
 
 ```go
-type reqOptionSetFunc func(*ReqOptions) ReqOptionSetter
+NewCourseListReq(courseType *CourseType, opts *ReqOptions) *CourseListReq
+=>
+NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseListReq
+```
 
-// for further expansion ,use struct to wrap
-type ReqOptionSetter struct {
-	// value interface{}
-	f reqOptionSetFunc
+```go
+type ReqOptions struct {
+	campusId         string
+	courseName       string
+	collectionStatus string
 }
 
-func (r *ReqOptionSetter) apply(ropts *ReqOptions) {
-	r.f(ropts)
+type reqOptionSetFunc func(*ReqOptions) (reqOptionSetFunc, interface{})
+
+type ReqOptionSetter struct {
+	f     reqOptionSetFunc
+	value interface{}
+}
+
+func (ros *ReqOptionSetter) Value() interface{} {
+	return ros.value
+}
+
+// return ReqOptionSetter to restore old/previous value
+func (ros *ReqOptionSetter) apply(ropts *ReqOptions) ReqOptionSetter {
+	setter, prev := ros.f(ropts)
+	return ReqOptionSetter{setter, prev}
 }
 
 func WithCampus(campusId string) ReqOptionSetter {
 	return ReqOptionSetter{
-		func(ro *ReqOptions) ReqOptionSetter {
+		func(ro *ReqOptions) (reqOptionSetFunc, interface{}) {
 			prev := ro.campusId
 			ro.campusId = campusId
-			return WithCampus(prev)
+			return WithCampus(prev).f, prev
 		},
+		nil,
 	}
 }
 
@@ -197,7 +215,17 @@ func NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseLi
 	for _, o := range opts {
 		o.apply(&req.options)
 	}
+
 	return req
+}
+
+// set optional parameters
+func (r *CourseListReq) Option(opts ...ReqOptionSetter) ReqOptionSetter {
+	var prevSetter ReqOptionSetter
+	for _, o := range opts {
+		prevSetter = o.apply(&r.options)
+	}
+	return prevSetter
 }
 ```
 </details>

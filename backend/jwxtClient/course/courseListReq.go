@@ -22,45 +22,53 @@ func defaultReqOptions() ReqOptions {
 	}
 }
 
-type reqOptionSetFunc func(*ReqOptions) ReqOptionSetter
+type reqOptionSetFunc func(*ReqOptions) (reqOptionSetFunc, interface{})
 
-// for further expansion ,use struct to wrap
 type ReqOptionSetter struct {
-	// value interface{}
-	f reqOptionSetFunc
+	f     reqOptionSetFunc
+	value interface{}
 }
 
-func (r *ReqOptionSetter) apply(ropts *ReqOptions) {
-	r.f(ropts)
+func (ros *ReqOptionSetter) Value() interface{} {
+	return ros.value
+}
+
+// return ReqOptionSetter to restore old/previous value
+func (ros *ReqOptionSetter) apply(ropts *ReqOptions) ReqOptionSetter {
+	setter, prev := ros.f(ropts)
+	return ReqOptionSetter{setter, prev}
 }
 
 func WithCampus(campusId string) ReqOptionSetter {
 	return ReqOptionSetter{
-		func(ro *ReqOptions) ReqOptionSetter {
+		func(ro *ReqOptions) (reqOptionSetFunc, interface{}) {
 			prev := ro.campusId
 			ro.campusId = campusId
-			return WithCampus(prev)
+			return WithCampus(prev).f, prev
 		},
+		nil,
 	}
 }
 
 func WithCourseName(courseName string) ReqOptionSetter {
 	return ReqOptionSetter{
-		func(ro *ReqOptions) ReqOptionSetter {
+		func(ro *ReqOptions) (reqOptionSetFunc, interface{}) {
 			prev := ro.courseName
 			ro.courseName = courseName
-			return WithCourseName(prev)
+			return WithCourseName(prev).f, prev
 		},
+		nil,
 	}
 }
 
 func WithShowCollected(isOnlyShowCollected bool) ReqOptionSetter {
 	return ReqOptionSetter{
-		func(ro *ReqOptions) ReqOptionSetter {
+		func(ro *ReqOptions) (reqOptionSetFunc, interface{}) {
 			prev := ro.collectionStatus
 			ro.collectionStatus = util.Bool2Str(isOnlyShowCollected)
-			return WithShowCollected(util.Str2Bool(prev))
+			return WithShowCollected(util.Str2Bool(prev)).f, prev
 		},
+		nil,
 	}
 }
 
@@ -76,6 +84,8 @@ type CourseListReq struct {
 }
 
 func NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseListReq {
+	// todo: u shouldn't verify global.xxx here, add a unified verifier elsewhere,
+	// todo: it may be suggested to be called after client.loginOk
 	if global.YEAR_TERM == "" {
 		global.Log.WithField("semester:", global.YEAR_TERM).Info("未设置学期 ", util.WhereAmI())
 		return nil
@@ -92,6 +102,15 @@ func NewCourseListReq(courseType *CourseType, opts ...ReqOptionSetter) *CourseLi
 	}
 
 	return req
+}
+
+// set optional parameters
+func (r *CourseListReq) Option(opts ...ReqOptionSetter) ReqOptionSetter {
+	var prevSetter ReqOptionSetter
+	for _, o := range opts {
+		prevSetter = o.apply(&r.options)
+	}
+	return prevSetter
 }
 
 // func (r *CourseListReq) SetCampusId(campus string) *CourseListReq {
