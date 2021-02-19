@@ -3,8 +3,8 @@ package client
 import (
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 type JwxtClient struct {

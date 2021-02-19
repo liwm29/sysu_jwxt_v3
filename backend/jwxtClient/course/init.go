@@ -1,5 +1,7 @@
 package course
 
+import ()
+
 var (
 	_selectedType = map[string]string{
 		"本专业":  "1",

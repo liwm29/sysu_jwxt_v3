@@ -2,9 +2,10 @@ package course
 
 import (
 	"fmt"
+
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 // 之所以这样设计,一方面是往New函数里面传option是一种风格,另一方面,也是为了可拓展性,因为请求还可以加入其他字段
@@ -18,7 +19,7 @@ func defaultReqOptions() ReqOptions {
 	return ReqOptions{
 		campusId:         "",
 		courseName:       "",
-		collectionStatus: "",
+		collectionStatus: "0",
 	}
 }
 
@@ -144,7 +145,7 @@ func (r *CourseListReq) Marshall() string {
 }
 
 // 返回所有课程列表,从第一页开始
-func (reqJson *CourseListReq) Do(c request.Clienter) *CourseList {
+func (reqJson *CourseListReq) Do(c global.JwxtClienter) *CourseList {
 	global.Log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
 	courses, n_page := reqJson.SetPageNo(1).DoPage(c)
 
@@ -158,7 +159,7 @@ func (reqJson *CourseListReq) Do(c request.Clienter) *CourseList {
 
 // 返回一页课程列表,设置courseListReq.SetPage()
 // @return 返回本页内所有课程列表,和所有页的课程数
-func (reqJson *CourseListReq) DoPage(c request.Clienter) (courseList *CourseList, n_page int) {
+func (reqJson *CourseListReq) DoPage(c global.JwxtClienter) (courseList *CourseList, n_page int) {
 	global.Log.WithField("reqJson", reqJson.Marshall()).Debug(util.WhereAmI())
 
 	url := global.HOST + "jwxt/choose-course-front-server/classCourseInfo/course/list"

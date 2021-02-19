@@ -2,7 +2,7 @@ package course
 
 import (
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 type CoursePhaseResp struct {
@@ -24,7 +24,7 @@ type CoursePhase struct {
 	CrossMajor              string `json:"crossMajor"`
 }
 
-func GetCoursePhase(c request.Clienter) *CoursePhase {
+func GetCoursePhase(c global.JwxtClienter) *CoursePhase {
 	url := global.HOST + "jwxt/choose-course-front-server/classCourseInfo/selectCourseInfo"
 	ref := global.HOST + "jwxt/mk/courseSelection/"
 	respJson := request.Get(url).Referer(ref).Do(c).Bytes()
@@ -38,5 +38,5 @@ func GetCoursePhase(c request.Clienter) *CoursePhase {
 }
 
 func (p *CoursePhase) CanSelect() bool {
-	return  p.ElectiveCourseStageCode == "3" 
+	return p.ElectiveCourseStageCode == "3"
 }

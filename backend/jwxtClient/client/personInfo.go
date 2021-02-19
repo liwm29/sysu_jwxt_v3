@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/student"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/teacher"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 func (c *JwxtClient) GetStudentImg(id string) []byte {

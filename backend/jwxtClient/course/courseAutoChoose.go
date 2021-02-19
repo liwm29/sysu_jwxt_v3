@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
 	"time"
 )
 
 // 如果作为一个三方库设计,不应该是一个完全黑盒,所以这里也传递选课失败信息
-func (c *Course) AutoChoose(cl request.Clienter, sleep time.Duration) <-chan error {
+func (c *Course) AutoChoose(cl global.JwxtClienter, sleep time.Duration) <-chan error {
 	isOk := make(chan error)
 	go func() {
 		color.Green("开始选课任务,刷新间隔:%#v seconds", sleep/time.Second)

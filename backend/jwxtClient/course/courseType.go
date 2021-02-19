@@ -2,7 +2,8 @@ package course
 
 import (
 	"errors"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
 )
 
 type CourseType struct {

@@ -6,11 +6,12 @@ import (
 	"io/ioutil"
 	"net/url"
 	"os"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/fatih/color"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 type LoginForm struct {

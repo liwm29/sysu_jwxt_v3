@@ -3,10 +3,11 @@ package course
 import (
 	"errors"
 	"fmt"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 	"strings"
+
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 type Course struct {
@@ -29,7 +30,7 @@ func (c *Course) teachingClassId() string { return c.BaseInfo.TeachingClassID }
 func (c *Course) selectedType() string    { return c.CourseType.SelectedType }
 func (c *Course) selectedCate() string    { return c.CourseType.SelectedCate }
 
-func (c *Course) Choose(cl request.Clienter) bool {
+func (c *Course) Choose(cl global.JwxtClienter) bool {
 	url := global.HOST + "jwxt/choose-course-front-server/classCourseInfo/course/choose"
 	ref := global.HOST + "jwxt/mk/courseSelection/"
 	tpl := `{"clazzId":"%s","selectedType":"%s","selectedCate":"%s","check":true}`
@@ -46,7 +47,7 @@ func (c *Course) Choose(cl request.Clienter) bool {
 	}
 }
 
-func (c *Course) Cancel(cl request.Clienter) bool {
+func (c *Course) Cancel(cl global.JwxtClienter) bool {
 	url := global.HOST + "jwxt/choose-course-front-server/classCourseInfo/course/back"
 	ref := global.HOST + "jwxt/mk/courseSelection/"
 	tpl := `{"courseId":"%s","clazzId":"%s","selectedType":"%s"}`
@@ -64,7 +65,7 @@ func (c *Course) Cancel(cl request.Clienter) bool {
 	}
 }
 
-func (c *Course) doCollection(cl request.Clienter) []byte {
+func (c *Course) doCollection(cl global.JwxtClienter) []byte {
 	url := global.HOST + "jwxt/choose-course-front-server/stuCollectedCourse/create"
 	ref := global.HOST + "jwxt/mk/courseSelection/?resourceName=%25E9%2580%2589%25E8%25AF%25BE"
 	tpl := `{"classesID":"%s","selectedType":"%s"}`
@@ -72,7 +73,7 @@ func (c *Course) doCollection(cl request.Clienter) []byte {
 	return request.PostJson(url, body).Referer(ref).Do(cl).Bytes()
 }
 
-func (c *Course) PushCollection(cl request.Clienter) bool {
+func (c *Course) PushCollection(cl global.JwxtClienter) bool {
 	respJson := c.doCollection(cl)
 	var resp util.NormalResp
 	request.JsonToStruct(respJson, &resp)
@@ -85,7 +86,7 @@ func (c *Course) PushCollection(cl request.Clienter) bool {
 	}
 }
 
-func (c *Course) PopCollection(cl request.Clienter) bool {
+func (c *Course) PopCollection(cl global.JwxtClienter) bool {
 	respJson := c.doCollection(cl)
 	var resp util.NormalResp
 	request.JsonToStruct(respJson, &resp)
@@ -112,7 +113,7 @@ func (c *Course) VacancyInfo() string {
 	return fmt.Sprintf("Name:%s Vacancy:%d", c.CourseName(), c.VacancyNum())
 }
 
-func (c *Course) Refresh(cl request.Clienter) error {
+func (c *Course) Refresh(cl global.JwxtClienter) error {
 	req := NewCourseListReq(c.CourseType, WithCourseName(c.BaseInfo.CourseNum))
 	courseList, n_page := req.DoPage(cl)
 	if n_page != 1 || len(courseList.Courses) != 1 {

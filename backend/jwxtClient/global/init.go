@@ -5,8 +5,10 @@
 package global
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
+
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,4 +34,9 @@ func SetLogLevel_INFO() {
 
 func SetLogLevel_DEBUG() {
 	Log.SetLevel(logrus.DebugLevel)
+}
+
+type JwxtClienter interface {
+	// Do(*request.HttpReq) *request.HttpResp
+	request.Clienter
 }

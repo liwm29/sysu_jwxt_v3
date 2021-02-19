@@ -2,9 +2,10 @@ package course
 
 import (
 	"errors"
+
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/request"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/internal/util"
+	"github.com/liwm29/sysu_jwxt_v3/backend/request"
 )
 
 type courseOutlineResp struct {
@@ -91,7 +92,7 @@ type teacherInfo struct {
 	EmployTime           string `json:"employTime"`
 }
 
-func (c *Course) GetTeachers(cl request.Clienter) ([]teacherInfo, error) {
+func (c *Course) GetTeachers(cl global.JwxtClienter) ([]teacherInfo, error) {
 	url := global.HOST + "jwxt/training-programe/courseoutline/getalloutlineinfo?courseNum=" + c.BaseInfo.CourseNum
 	ref := global.HOST + "jwxt/mk/courseSelection/"
 	respJson := request.Get(url).Referer(ref).Do(cl).Bytes()

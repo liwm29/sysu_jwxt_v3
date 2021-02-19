@@ -1,12 +1,10 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	jwxtClient "github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/client"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
 	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/util"
 	"io/ioutil"
 	"os"
 	"time"
@@ -50,7 +48,8 @@ func main() {
 	// course, err := c.ListCourse(course.TYPE_PUB_ELECTIVE, course.WithCourseName("photoshop")).First()
 
 	if err != nil {
-		fmt.Println("未找到课程信息:", err)
+		fmt.Println("未找到课程信息:photoshop", err)
+		return
 	} else {
 		fmt.Println("找到:", course.VacancyInfo())
 	}
@@ -69,7 +68,8 @@ func main() {
 
 	// 如果在选课第三阶段
 	if !selectPhase.CanSelect() {
-		util.PanicIf(errors.New("不在选课阶段" + fmt.Sprintf("%#v", selectPhase)))
+		fmt.Println("不在选课阶段", selectPhase)
+		return
 	}
 	if course.VacancyNum() > 0 {
 		isOk := course.Choose(c)
