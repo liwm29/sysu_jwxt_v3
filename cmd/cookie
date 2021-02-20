@@ -1,0 +1,134 @@
+{
+	"cas-443.webvpn.sysu.edu.cn": [
+		{
+			"Name": "JSESSIONID",
+			"Value": "95D6B024A0852945EF95851991FACBCA",
+			"Path": "/cas",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "JSESSIONID=95D6B024A0852945EF95851991FACBCA;Path=/cas",
+			"Unparsed": null
+		},
+		{
+			"Name": "TGC",
+			"Value": "eyJhbGciOiJIUzUxMiJ9.WlhsS05tRllRV2xQYVVwRlVsVlphVXhEU21oaVIyTnBUMmxLYTJGWVNXbE1RMHBzWW0xTmFVOXBTa0pOVkVrMFVUQktSRXhWYUZSTmFsVXlTVzR3TGk1V1RVVlhTMVpRYTBwRGVIaHhWUzFqYlc5RE5GTlJMbEpEYW1OYVYyRlRlbUZ2V0ZCaVYzcFNiVEJhZERSdE9HeEJkbGd3ZGpsdFYweE1TVnBaVTI5cVRESTRhSHBvYkV0VVZVTXdXVkUzVUVGa1JFWlZWbmd3YnpKblVUTjZTRFEwZW5OVk5tSkxTMFpETUhsM1UwcEljbmRhVUc1c0xXcEVSREZqZEhWV01WQm9lbVUzTURaclkyODFOMDlhY0c5SFoxTkhUVFJPUmpOcFNtVllWMk4yUVc4NWMzUTJTV05mVTBSRFpGWnZWa2g1ZUZKd05VZGlVRTFYUVZVMGRuZFBXRzQ0V201c1VFOTBObUU1V2tsSFFqVk1PRXRCWWtsb056Vm5RME4wYTNGa2VrWTRORTFQTkU4NVREVXRWMUJZTm05clNtTnplRmxaU0dJeWQxUlFSVXRMUjFKS1F6bGhla000ZDNKcWJqSnZjVVZDZVdrdVoyRnlRWEZsYm5wSldGRkdXbGh6YVdjMlEybE9VUT09.Rnml1JvAAMHHvZMi1z55n2Q8omlB2EZoXJS_5FnhiIglvgMsFK_-46Ad2oSOf1JtWZIZtbvH5rUHWOMKaai7-Q",
+			"Path": "/cas/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "TGC=eyJhbGciOiJIUzUxMiJ9.WlhsS05tRllRV2xQYVVwRlVsVlphVXhEU21oaVIyTnBUMmxLYTJGWVNXbE1RMHBzWW0xTmFVOXBTa0pOVkVrMFVUQktSRXhWYUZSTmFsVXlTVzR3TGk1V1RVVlhTMVpRYTBwRGVIaHhWUzFqYlc5RE5GTlJMbEpEYW1OYVYyRlRlbUZ2V0ZCaVYzcFNiVEJhZERSdE9HeEJkbGd3ZGpsdFYweE1TVnBaVTI5cVRESTRhSHBvYkV0VVZVTXdXVkUzVUVGa1JFWlZWbmd3YnpKblVUTjZTRFEwZW5OVk5tSkxTMFpETUhsM1UwcEljbmRhVUc1c0xXcEVSREZqZEhWV01WQm9lbVUzTURaclkyODFOMDlhY0c5SFoxTkhUVFJPUmpOcFNtVllWMk4yUVc4NWMzUTJTV05mVTBSRFpGWnZWa2g1ZUZKd05VZGlVRTFYUVZVMGRuZFBXRzQ0V201c1VFOTBObUU1V2tsSFFqVk1PRXRCWWtsb056Vm5RME4wYTNGa2VrWTRORTFQTkU4NVREVXRWMUJZTm05clNtTnplRmxaU0dJeWQxUlFSVXRMUjFKS1F6bGhla000ZDNKcWJqSnZjVVZDZVdrdVoyRnlRWEZsYm5wSldGRkdXbGh6YVdjMlEybE9VUT09.Rnml1JvAAMHHvZMi1z55n2Q8omlB2EZoXJS_5FnhiIglvgMsFK_-46Ad2oSOf1JtWZIZtbvH5rUHWOMKaai7-Q;Path=/cas/",
+			"Unparsed": null
+		}
+	],
+	"jwxt-443.webvpn.sysu.edu.cn": [
+		{
+			"Name": "BIGipServerPool_jwxt",
+			"Value": "2365853706.20480.0000",
+			"Path": "/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "BIGipServerPool_jwxt=2365853706.20480.0000;path=/",
+			"Unparsed": null
+		},
+		{
+			"Name": "LYSESSIONID",
+			"Value": "338594ab-b48a-4a81-a8c5-2f0b26556b6b",
+			"Path": "/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "LYSESSIONID=338594ab-b48a-4a81-a8c5-2f0b26556b6b;path=/",
+			"Unparsed": null
+		},
+		{
+			"Name": "user",
+			"Value": "eyJ1c2VyVHlwZSI6IjEiLCJ1c2VyTmFtZSI6IjE4MzQxMDE4IiwibmFtZSI6IuadjuS8n+mTrSIsImxvZ2luUGF0dGVybiI6InN0dWRlbnQtbG9naW4iLCJzc28iOnRydWV9",
+			"Path": "/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "user=eyJ1c2VyVHlwZSI6IjEiLCJ1c2VyTmFtZSI6IjE4MzQxMDE4IiwibmFtZSI6IuadjuS8n+mTrSIsImxvZ2luUGF0dGVybiI6InN0dWRlbnQtbG9naW4iLCJzc28iOnRydWV9;path=/",
+			"Unparsed": null
+		}
+	],
+	"webvpn.sysu.edu.cn": [
+		{
+			"Name": "SERVERID",
+			"Value": "Server1",
+			"Path": "/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": false,
+			"HttpOnly": false,
+			"SameSite": 0,
+			"Raw": "SERVERID=Server1; path=/",
+			"Unparsed": null
+		},
+		{
+			"Name": "_webvpn_key",
+			"Value": "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoibGl3bTI5IiwiaWF0IjoxNjEzODA1MTIzLCJleHAiOjE2MTM4OTE1MjN9.2AsVygyYQXEvpbsBTFIzt-gG0GOELLZrZPsUFvZMSSg",
+			"Path": "/",
+			"Domain": ".sysu.edu.cn",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": true,
+			"HttpOnly": true,
+			"SameSite": 0,
+			"Raw": "_webvpn_key=eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoibGl3bTI5IiwiaWF0IjoxNjEzODA1MTIzLCJleHAiOjE2MTM4OTE1MjN9.2AsVygyYQXEvpbsBTFIzt-gG0GOELLZrZPsUFvZMSSg; domain=.sysu.edu.cn; path=/; secure; HttpOnly",
+			"Unparsed": null
+		},
+		{
+			"Name": "webvpn_username",
+			"Value": "liwm29%7C1613805123%7C50bbc0557bdb10a3f38587e8ace6899a6558fbcf",
+			"Path": "/",
+			"Domain": ".sysu.edu.cn",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": true,
+			"HttpOnly": true,
+			"SameSite": 0,
+			"Raw": "webvpn_username=liwm29%7C1613805123%7C50bbc0557bdb10a3f38587e8ace6899a6558fbcf; domain=.sysu.edu.cn; path=/; secure; HttpOnly",
+			"Unparsed": null
+		},
+		{
+			"Name": "_astraeus_session",
+			"Value": "MGNGR3A1Y2pMRnVoVzRtMXhKRFpVdUFwWmhmZ0FkQlYzaTg2U0wxbkc0dUpXM1lDUFk1bnppNzBqZ1gwRm1kLzF3eTV5V2pSa0I4YnpHcU9WeERReXNTNStKSVo2Yjc3SVlaU1hUSWRkWHVQZ3VBYis0TzZFMXFCRWl6VkJtTmJNNUNHUWhGaWF3NWRhOTNOYjFqM08zQXpUZ1Nhdy9kTGpUUjFheTFQdVdmWEwxNmdvZENKdUxUQnIyMXpyc3owczRSbWh4MndCZjd2OHJFRjQ4bkJpWXYxbDBDblJvNmpBb3NZeXZPb2MrVT0tLUw3bTFSYjRVUzJiR1BNYmdsR0xobUE9PQ%3D%3D--f9fc5846914aaedb9bd50b4093b992d98b93476d",
+			"Path": "/",
+			"Domain": "",
+			"Expires": "0001-01-01T00:00:00Z",
+			"RawExpires": "",
+			"MaxAge": 0,
+			"Secure": true,
+			"HttpOnly": true,
+			"SameSite": 0,
+			"Raw": "_astraeus_session=MGNGR3A1Y2pMRnVoVzRtMXhKRFpVdUFwWmhmZ0FkQlYzaTg2U0wxbkc0dUpXM1lDUFk1bnppNzBqZ1gwRm1kLzF3eTV5V2pSa0I4YnpHcU9WeERReXNTNStKSVo2Yjc3SVlaU1hUSWRkWHVQZ3VBYis0TzZFMXFCRWl6VkJtTmJNNUNHUWhGaWF3NWRhOTNOYjFqM08zQXpUZ1Nhdy9kTGpUUjFheTFQdVdmWEwxNmdvZENKdUxUQnIyMXpyc3owczRSbWh4MndCZjd2OHJFRjQ4bkJpWXYxbDBDblJvNmpBb3NZeXZPb2MrVT0tLUw3bTFSYjRVUzJiR1BNYmdsR0xobUE9PQ%3D%3D--f9fc5846914aaedb9bd50b4093b992d98b93476d; path=/; secure; HttpOnly",
+			"Unparsed": null
+		}
+	]
+}

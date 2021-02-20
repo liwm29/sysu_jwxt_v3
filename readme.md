@@ -19,10 +19,36 @@
 └─request
 ```
 
-## JwxtClient
-> 将/backend/jwxtClient作为一个第三方库使用
+## Cli
+### build
+```
+cd cmd
+go build 
+./cmd -h
+./cmd login -h
+```
+### help
+`jwxt `
+```
+COMMANDS:
+   login    sign in the sysu jwxt, get the cookie
+   list     list course
+   course   courseTeacherInfo
+   choose   choose course
+   cancel   cancel course
+   img      teacher's/student's image
+   help, h  Shows a list of commands or help for one command
+```
 
-代码示例: /example/main.go
+### login
+![](2021-02-20-14-40-44.png)
+### list
+![](2021-02-20-15-16-37.png)
+### ...
+## Third-party Package
+> 将/pkg/jwxtClient作为一个第三方库使用
+
+代码示例: /pkg/jwxtClient/example/main.go
 
 <details>
 <summary>Example</summary>
@@ -35,9 +61,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	jwxtClient "github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/client"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/course"
-	"github.com/liwm29/sysu_jwxt_v3/backend/jwxtClient/global"
+	jwxtClient "github.com/liwm29/sysu_jwxt_v3/pkg/jwxtClient/client"
+	"github.com/liwm29/sysu_jwxt_v3/pkg/jwxtClient/course"
+	"github.com/liwm29/sysu_jwxt_v3/pkg/jwxtClient/global"
 	"time"
 )
 
@@ -230,7 +256,8 @@ func (r *CourseListReq) Option(opts ...ReqOptionSetter) ReqOptionSetter {
 - 2021/01/20~2021/01/23 jwxtClient初步完成
 - 2021/01/29 修复了cookiejar的bug,添加了jwxt443的接口,可在校外通过webvpn访问jwxt
 - 2021/02/09 修改了NewCourseListReq函数接口
-- 2021/02/20 升级了request,禁止了默认的重定向,以获得重定向过程中的set-cookie;移出了前端;
+- 2021/02/19 升级了request,禁止了默认的重定向,以获得重定向过程中的set-cookie;移除了前端;
+- 2021/02/20 增加了cli
 
 ## OTHER
 <details>
