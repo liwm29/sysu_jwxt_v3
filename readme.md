@@ -4,19 +4,21 @@
 
 ## 项目目录结构
 ```sh
-.
-├─jwxtClient
-│  ├─client
-│  ├─course
-│  ├─example
-│  ├─global
-│  ├─internal
-│  │  └─util
-│  ├─student
-│  ├─teacher
-│  └─test
-├─proxyServer
-└─request
+├─cmd
+├─pkg
+│  ├─jwxtClient
+│  │  ├─client
+│  │  ├─course
+│  │  ├─example
+│  │  ├─global
+│  │  ├─internal
+│  │  │  └─util
+│  │  ├─student
+│  │  ├─teacher
+│  │  └─test
+│  ├─proxyServer
+│  └─request
+└─static
 ```
 
 ## Cli
@@ -41,9 +43,9 @@ COMMANDS:
 ```
 
 ### login
-![](2021-02-20-14-40-44.png)
+![](static/2021-02-20-14-40-44.png)
 ### list
-![](2021-02-20-15-16-37.png)
+![](static/2021-02-20-15-16-37.png)
 ### ...
 ## Third-party Package
 > 将/pkg/jwxtClient作为一个第三方库使用

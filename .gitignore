@@ -1,7 +1,6 @@
 .vscode
-vue-el-admin/
-frontend/dist/*
-!frontend/dist/.gitkeep
-sysu_jwxt_v2/
 pkg/jwxtClient/test/*
 !pkg/jwxtClient/test/test.go
+cmd/*
+!cmd/cmd.go
+
