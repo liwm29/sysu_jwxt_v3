@@ -23,12 +23,30 @@
 
 ## Cli
 ### build
+```shell
+# windows
+go build -o jwxt.exe ./cmd
+cp ./jwxt.exe $env:GOPATH\bin
+#linux
+go build -o jwxt ./cmd
+cp ./jwxt $GOPATH\bin
+
+jwxt -h
+jwxt login -h
+jwxt list -h
+jwxt choose -h
+jwxt cancel -h
+jwxt img -h
 ```
-cd cmd
-go build 
-./cmd -h
-./cmd login -h
+
+#### docker
+```shell
+docker build -t=jwxt .
+docker run -it --rm jwxt
+进入到docker容器
+jwxt -h
 ```
+
 ### help
 `jwxt `
 ```
@@ -47,6 +65,8 @@ COMMANDS:
 ### list
 ![](static/2021-02-20-15-16-37.png)
 ### ...
+- 注意密码可能含有特殊字符,需要防止在shell中输入时与期望不符,可以在log中查看最终提交的密码是否与输入一致,必要时对其转义
+
 ## Third-party Package
 > 将/pkg/jwxtClient作为一个第三方库使用
 
@@ -247,6 +267,14 @@ func (r *CourseListReq) Option(opts ...ReqOptionSetter) ReqOptionSetter {
 }
 ```
 </details>
+
+## Request
+基于http.Client封装的简单易用客户端
+### Feature
+- 能实现cookie的导入导出
+- 能实现重定向过程中的cookie/setcookie追踪
+- 简单易用的api,方便设置某些头部字段
+- 对每次req/resp记录log
 
 ## ChangeLog
 - 2021/01/08 初始化任务目标, 计划考试后开始
