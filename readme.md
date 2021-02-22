@@ -23,14 +23,8 @@
 
 ## Cli
 ### build
+`go install ./cmd/jwxt`
 ```shell
-# windows
-go build -o jwxt.exe ./cmd
-cp ./jwxt.exe $env:GOPATH\bin
-#linux
-go build -o jwxt ./cmd
-cp ./jwxt $GOPATH\bin
-
 jwxt -h
 jwxt login -h
 jwxt list -h
@@ -43,7 +37,7 @@ jwxt img -h
 ```shell
 docker build -t=jwxt .
 docker run -it --rm jwxt
-进入到docker容器
+默认进入/bin/bash
 jwxt -h
 ```
 

@@ -3,4 +3,4 @@ pkg/jwxtClient/test/*
 !pkg/jwxtClient/test/test.go
 cmd/*
 !cmd/cmd.go
-
+log
